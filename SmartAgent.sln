@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36930.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartAgent", "SmartAgent\SmartAgent.csproj", "{235813E4-306B-4296-B296-7AB4C8F8FEF4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{235813E4-306B-4296-B296-7AB4C8F8FEF4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{235813E4-306B-4296-B296-7AB4C8F8FEF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{235813E4-306B-4296-B296-7AB4C8F8FEF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{235813E4-306B-4296-B296-7AB4C8F8FEF4}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1C104E92-D903-444D-AF52-448BE6655DB6}
+	EndGlobalSection
+EndGlobal

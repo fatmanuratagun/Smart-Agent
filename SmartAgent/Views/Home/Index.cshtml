@@ -1,0 +1,26 @@
+﻿@{
+    ViewData["Title"] = "Aura - Akıllı Alışveriş Ajanı";
+}
+
+<div class="text-center mt-5">
+    <h2>Aura'ya Sor</h2>
+    <form method="post" asp-action="Index">
+        <div class="input-group mb-3 mt-4" style="max-width: 600px; margin: auto;">
+            <input type="text" name="userQuery" class="form-control" placeholder="Örn: 30.000 TL bütçem var, oyun için laptop mu masaüstü mü?" required>
+            <button class="btn btn-primary" type="submit">Ajanı Çalıştır</button>
+        </div>
+    </form>
+</div>
+
+@if (ViewBag.Message != null)
+{
+    <div class="card mt-4" style="max-width: 800px; margin: auto;">
+        <div class="card-header bg-dark text-white">
+            <strong>Sorduğunuz Soru:</strong> @ViewBag.UserQuery
+        </div>
+        <div class="card-body text-start">
+            <!-- AI çıktısını Markdown veya düz metin formatında basıyoruz -->
+            <pre style="white-space: pre-wrap; font-family: inherit;">@ViewBag.Message</pre>
+        </div>
+    </div>
+}
