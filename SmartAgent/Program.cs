@@ -1,10 +1,14 @@
-using SmartAgent.Services;
+﻿using SmartAgent.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<SmartAgentService>();
+// Firebase buraya eklendi
+builder.Services.AddSingleton<FirebaseService>(new FirebaseService(
+    "https://smartagent-c08e1-default-rtdb.europe-west1.firebasedatabase.app/"  // ← bunu kendi URL'inle değiştir
+));
 
 var app = builder.Build();
 

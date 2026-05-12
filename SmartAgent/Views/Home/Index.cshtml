@@ -2,25 +2,149 @@
     ViewData["Title"] = "Aura - Akıllı Alışveriş Ajanı";
 }
 
+<style>
+    @@keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes textCycle {
+        0%, 100% {
+            opacity: 1;
+        }
+
+        45% {
+            opacity: 1;
+        }
+
+        55% {
+            opacity: 0;
+        }
+    }
+
+    #loading-screen {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 20px;
+        animation: fadeIn 0.4s ease;
+    }
+
+    .spinner {
+        width: 56px;
+        height: 56px;
+        border: 4px solid #e0e0ff;
+        border-top: 4px solid #6c63ff;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 28px;
+    }
+
+    .loading-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #1a1a2e;
+        margin-bottom: 12px;
+    }
+
+    .loading-text {
+        font-size: 14px;
+        color: #888;
+        min-height: 22px;
+        transition: opacity 0.4s;
+    }
+
+    .result-card {
+        animation: fadeIn 0.6s ease;
+    }
+</style>
+
 <div class="text-center mt-5">
     <h2>Aura'ya Sor</h2>
-    <form method="post" asp-action="Index">
+    <form method="post" asp-action="Index" id="search-form">
         <div class="input-group mb-3 mt-4" style="max-width: 600px; margin: auto;">
-            <input type="text" name="userQuery" class="form-control" placeholder="Örn: 30.000 TL bütçem var, oyun için laptop mu masaüstü mü?" required>
+            <input type="text" name="userQuery" id="userQuery" class="form-control"
+                   placeholder="Örn: 30.000 TL bütçem var, oyun için laptop mu masaüstü mü?" required>
             <button class="btn btn-primary" type="submit">Ajanı Çalıştır</button>
         </div>
     </form>
 </div>
 
+<!-- Loading Ekranı -->
+<div id="loading-screen">
+    <div class="spinner"></div>
+    <div class="loading-title">Aura analiz ediyor...</div>
+    <div class="loading-text" id="loading-text">Teknoloji forumları taranıyor...</div>
+</div>
+
 @if (ViewBag.Message != null)
 {
-    <div class="card mt-4" style="max-width: 800px; margin: auto;">
+    <div class="card mt-4 result-card" style="max-width: 800px; margin: auto;">
         <div class="card-header bg-dark text-white">
             <strong>Sorduğunuz Soru:</strong> @ViewBag.UserQuery
         </div>
-        <div class="card-body text-start">
-            <!-- AI çıktısını Markdown veya düz metin formatında basıyoruz -->
-            <pre style="white-space: pre-wrap; font-family: inherit;">@ViewBag.Message</pre>
+        <div class="card-body text-start" style="padding: 24px;">
+            @Html.Raw(ViewBag.FormattedMessage)
         </div>
     </div>
 }
+
+<script>
+    const messages = [
+        "Teknoloji forumları taranıyor...",
+        "Kullanıcı şikayetleri okunuyor...",
+        "Fiyat geçmişi analiz ediliyor...",
+        "Satıcı güven skorları hesaplanıyor...",
+        "Aura tavsiyesi hazırlanıyor..."
+    ];
+
+    let msgIndex = 0;
+    let interval;
+
+    document.getElementById('search-form').addEventListener('submit', function () {
+        // Formu gizle
+        document.querySelector('.text-center').style.display = 'none';
+
+        // Loading ekranını göster
+        const loading = document.getElementById('loading-screen');
+        loading.style.display = 'flex';
+
+        // Mesajları döndür
+        interval = setInterval(function () {
+            msgIndex = (msgIndex + 1) % messages.length;
+            const textEl = document.getElementById('loading-text');
+            textEl.style.opacity = '0';
+            setTimeout(function () {
+                textEl.textContent = messages[msgIndex];
+                textEl.style.opacity = '1';
+            }, 300);
+        }, 2000);
+    });
+</script>
+<script>
+    // URL'den userQuery parametresi varsa formu otomatik gönder
+    const urlParams = new URLSearchParams(window.location.search);
+    const query = urlParams.get('userQuery');
+    if (query) {
+        document.getElementById('userQuery').value = query;
+        document.getElementById('search-form').submit();
+    }
+</script>
