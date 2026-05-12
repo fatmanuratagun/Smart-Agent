@@ -13,6 +13,8 @@ namespace SmartAgent.Services
     {
         private readonly string _apiKey;
         private readonly string _serperApiKey;
+        // YENİ EKLENEN HAFIZA DEĞİŞKENİ (Aura'nın Not Defteri)
+        private static string _chatHistory = "";
 
         public SmartAgentService(IConfiguration configuration)
         {
@@ -30,7 +32,7 @@ namespace SmartAgent.Services
                 var request = new HttpRequestMessage(HttpMethod.Post, "https://google.serper.dev/search");
                 request.Headers.Add("X-API-KEY", _serperApiKey);
 
-                var content = new StringContent($"{{\"q\":\"{query}\", \"gl\":\"tr\", \"hl\":\"tr\", \"num\": 3}}", Encoding.UTF8, "application/json");
+                var content = new StringContent($"{{\"q\":\"{query}\", \"gl\":\"tr\", \"hl\":\"tr\", \"num\": 8}}", Encoding.UTF8, "application/json");
                 request.Content = content;
 
                 var response = await client.SendAsync(request);
@@ -50,7 +52,14 @@ namespace SmartAgent.Services
             try
             {
                 Debug.WriteLine("--- 1. AŞAMA: İnternette arama başlatılıyor... ---");
-                string searchResultsJson = await SearchWebAsync(userQuery);
+
+                // YENİ EKLENEN SİHİRLİ SATIR: Soruyu zenginleştiriyoruz
+                string enrichedQuery = $"{userQuery} kullanıcı yorumları inceleme eksi yönleri şikayetler kronik sorun";
+
+                // ESKİ HALİ: await SearchWebAsync(userQuery);
+                // YENİ HALİ: Artık zenginleştirilmiş sorguyu aratıyoruz!
+                string searchResultsJson = await SearchWebAsync(enrichedQuery);
+
                 Debug.WriteLine("--- 2. AŞAMA: Arama bitti, sonuçlar geldi. ---");
 
                 if (searchResultsJson == "Arama yapılamadı.") return "İnternete bağlanılamadı, API anahtarlarını kontrol et.";
@@ -77,17 +86,24 @@ namespace SmartAgent.Services
 
                 Debug.WriteLine("--- 3. AŞAMA: Gemini'ye DOĞRUDAN HTTP İsteği Hazırlanıyor... ---");
 
-                string prompt = $@"Sen uzman bir e-ticaret danışmanısın. Kullanıcının sorusuna, internetten çektiğim şu güncel verileri kullanarak yanıt ver.
+                string prompt = $@"Sen uzman bir e-ticaret danışmanısın.
 
-Kullanıcının Sorusu: {userQuery}
+ÖNCEKİ KONUŞMALARIMIZ (Hafızan):
+{_chatHistory}
+
+KULLANICININ ŞİMDİKİ SORUSU: {userQuery}
 
 İnternet Verileri:
 {cleanData}
 
 GÖREVİN:
-1. Kullanıcıya genel bir mantık sunduktan sonra, mutlaka internet verilerinde geçen EN MANTIKLI 2-3 ÜRÜNÜ ismen ve fiyatıyla öner.
-2. Bu ürünlerin neden iyi olduğunu (kullanıcı yorumlarındaki olumlu puanlar, malzeme kalitesi vb.) kısaca belirt.
-3. Eğer internet verilerinde link varsa, kullanıcının tıklayıp gidebileceği şekilde belirt.
+1. ÖNCE KONTROL ET: Kullanıcının sorusu çok mu genel ve detaysız? (Örn: ""Bana bilgisayar öner"", ""Telefon alacağım"", ""Hangi tencereyi alayım?"").
+   -> EĞER ÇOK GENELSE: İnternet verilerini boşver ve HİÇBİR ÜRÜN ÖNERME. Bunun yerine bir mağaza danışmanı gibi sıcak bir dille kullanıcıya 2-3 tane yönlendirici soru sor (Bütçeniz nedir? Hangi amaçla kullanacaksınız? Özel bir marka tercihiniz var mı? vb.). Yanıtın SADECE BU SORULARDAN oluşsun. Aşağıdaki yanıt formatını KULLANMA.
+
+2. EĞER SORU YETERİNCE DETAYLIYSA (İçinde bütçe, marka, özellik veya net bir dert varsa) AŞAĞIDAKİ ADIMLARI İZLE:
+   A) Kullanıcıya genel bir mantık sunduktan sonra, EN MANTIKLI 2-3 ÜRÜNÜ ismen ve yaklaşık fiyatıyla öner. (DİKKAT: Eğer internetten çektiğim verilerde sadece kullanıcının sorduğu sorunlu ürün varsa ve alternatif geçmiyorsa, lütfen KENDİ UZMANLIĞINI VE BİLGİ BİRİKİMİNİ kullanarak en iyi alternatif markaları/modelleri sen öner!)
+   B) Bu ürünlerin neden iyi olduğunu (kullanıcı yorumlarındaki olumlu puanlar, malzeme kalitesi vb.) kısaca belirt.
+   C) Eğer internet verilerinde link varsa, kullanıcının tıklayıp gidebileceği şekilde belirt.
 
 YANIT FORMATIN ŞÖYLE OLSUN:
 - 🎯 Özet Tavsiye: (Kısa bir cümleyle ne almalı?)
@@ -128,10 +144,15 @@ YANIT FORMATIN ŞÖYLE OLSUN:
                 using (JsonDocument doc = JsonDocument.Parse(responseString))
                 {
                     var root = doc.RootElement;
-                    return root.GetProperty("candidates")[0]
-                               .GetProperty("content")
-                               .GetProperty("parts")[0]
-                               .GetProperty("text").GetString();
+                    string finalAnswer = root.GetProperty("candidates")[0]
+                                             .GetProperty("content")
+                                             .GetProperty("parts")[0]
+                                             .GetProperty("text").GetString();
+
+                    // SİHİRLİ DOKUNUŞ: Cevabı ekrana basmadan önce hafızaya (not defterine) yazıyoruz!
+                    _chatHistory += $"Kullanıcı: {userQuery}\nAura: {finalAnswer}\n---\n";
+
+                    return finalAnswer;
                 }
             }
             catch (System.Exception ex)
