@@ -1,22 +1,177 @@
 ﻿@{
-    ViewData["Title"] = "Aura - Akıllı Alışveriş Ajanı";
+    ViewData["Title"] = "Aura - Premium Asistan";
 }
 
 <style>
-    @@keyframes spin {
-        0% {
-            transform: rotate(0deg);
-        }
-
-        100% {
-            transform: rotate(360deg);
-        }
+    body {
+        background-color: #f3f4f6;
     }
 
-    @@keyframes fadeIn {
+    /* Tam Ekran ve Premium Konteyner */
+    .chat-wrapper {
+        width: 95%; /* Ekranı kaplaması için genişletildi */
+        max-width: 1400px;
+        margin: 20px auto;
+        background: #ffffff;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        height: 85vh; /* Yükseklik artırıldı */
+    }
+
+    /* Üst Bar - Minimalist */
+    .chat-header {
+        background: #ffffff;
+        border-bottom: 1px solid #e5e7eb;
+        color: #111827;
+        padding: 20px 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+        .chat-header h3 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+    .status-dot {
+        width: 10px;
+        height: 10px;
+        background-color: #10b981;
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+    .clear-btn {
+        background: transparent;
+        color: #6b7280;
+        border: 1px solid #e5e7eb;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+        .clear-btn:hover {
+            background: #fee2e2;
+            color: #ef4444;
+            border-color: #fca5a5;
+        }
+
+    /* Sohbet Alanı */
+    .chat-body {
+        flex: 1;
+        padding: 30px;
+        overflow-y: auto;
+        background: #f9fafb;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    /* Premium Baloncuklar */
+    .message-bubble {
+        max-width: 80%;
+        padding: 16px 24px;
+        border-radius: 20px;
+        line-height: 1.6;
+        font-size: 15px;
+        animation: slideUp 0.3s ease;
+        white-space: pre-wrap;
+    }
+
+    .user-message {
+        background: #2563eb;
+        color: white;
+        align-self: flex-end;
+        border-bottom-right-radius: 4px;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+    }
+
+    .aura-message {
+        background: #ffffff;
+        color: #1f2937;
+        align-self: flex-start;
+        border-bottom-left-radius: 4px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        border: 1px solid #e5e7eb;
+    }
+
+        .aura-message a {
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+            .aura-message a:hover {
+                text-decoration: underline;
+            }
+
+    /* Alt Kısım - Gönderme Kutusu */
+    .chat-footer {
+        padding: 24px 30px;
+        background: white;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .input-group {
+        display: flex;
+        gap: 12px;
+        background: #f3f4f6;
+        padding: 8px;
+        border-radius: 16px;
+        border: 1px solid #e5e7eb;
+        transition: all 0.3s;
+    }
+
+        .input-group:focus-within {
+            border-color: #2563eb;
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(37,99,235,0.1);
+        }
+
+        .input-group input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 12px 16px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .input-group button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 0 24px;
+            border-radius: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+            .input-group button:hover {
+                background: #1d4ed8;
+            }
+
+            .input-group button:disabled {
+                background: #9ca3af;
+                cursor: not-allowed;
+            }
+
+    /* Animasyonlar */
+    @@keyframes slideUp {
         from {
             opacity: 0;
-            transform: translateY(10px);
+            transform: translateY(15px);
         }
 
         to {
@@ -25,122 +180,113 @@
         }
     }
 
-    @@keyframes textCycle {
-        0%, 100% {
-            opacity: 1;
-        }
-
-        45% {
-            opacity: 1;
-        }
-
-        55% {
-            opacity: 0;
-        }
-    }
-
-    #loading-screen {
+    .typing-indicator {
         display: none;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 60px 20px;
-        animation: fadeIn 0.4s ease;
-    }
-
-    .spinner {
-        width: 56px;
-        height: 56px;
-        border: 4px solid #e0e0ff;
-        border-top: 4px solid #6c63ff;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-        margin-bottom: 28px;
-    }
-
-    .loading-title {
-        font-size: 18px;
-        font-weight: 600;
-        color: #1a1a2e;
-        margin-bottom: 12px;
-    }
-
-    .loading-text {
+        align-self: flex-start;
+        background: transparent;
+        color: #6b7280;
         font-size: 14px;
-        color: #888;
-        min-height: 22px;
-        transition: opacity 0.4s;
+        padding: 0 20px;
+        animation: pulse 1.5s infinite;
     }
 
-    .result-card {
-        animation: fadeIn 0.6s ease;
+    @@keyframes pulse {
+        0% {
+            opacity: 0.5;
+        }
+
+        50% {
+            opacity: 1;
+        }
+
+        100% {
+            opacity: 0.5;
+        }
     }
 </style>
 
-<div class="text-center mt-5">
-    <h2>Aura'ya Sor</h2>
-    <form method="post" asp-action="Index" id="search-form">
-        <div class="input-group mb-3 mt-4" style="max-width: 600px; margin: auto;">
-            <input type="text" name="userQuery" id="userQuery" class="form-control"
-                   placeholder="Örn: 30.000 TL bütçem var, oyun için laptop mu masaüstü mü?" required>
-            <button class="btn btn-primary" type="submit">Ajanı Çalıştır</button>
-        </div>
-    </form>
-</div>
+<div class="chat-wrapper">
+    <div class="chat-header">
+        <h3><span class="status-dot"></span> Aura <span style="font-weight: 400; color: #6b7280; font-size: 14px; margin-left: 5px;">Asistan</span></h3>
+        <form method="post" asp-action="Index" id="clear-form" style="margin:0;">
+            <input type="hidden" name="userQuery" value="sohbeti temizle" />
+            <button type="submit" class="clear-btn">Sohbeti Temizle</button>
+        </form>
+    </div>
 
-<!-- Loading Ekranı -->
-<div id="loading-screen">
-    <div class="spinner"></div>
-    <div class="loading-title">Aura analiz ediyor...</div>
-    <div class="loading-text" id="loading-text">Teknoloji forumları taranıyor...</div>
-</div>
-
-@if (ViewBag.Message != null)
-{
-    <div class="card mt-4 result-card" style="max-width: 800px; margin: auto;">
-        <div class="card-header bg-dark text-white">
-            <strong>Sorduğunuz Soru:</strong> @ViewBag.UserQuery
+    <div class="chat-body" id="chat-body">
+        <div class="message-bubble aura-message">
+            Merhaba! Ben Aura. Bütçeni veya aradığın ürünü bana söyle, sana en sorunsuz modelleri ve en ucuz fiyatları bulayım.
         </div>
-        <div class="card-body text-start" style="padding: 24px;">
-            @Html.Raw(ViewBag.FormattedMessage)
+
+        @if (ViewBag.UserQuery != null && ViewBag.UserQuery != "sohbeti temizle")
+        {
+            <div class="message-bubble user-message">
+                @ViewBag.UserQuery
+            </div>
+            <div class="message-bubble aura-message">
+                @Html.Raw(ViewBag.FormattedMessage)
+            </div>
+        }
+        else if (ViewBag.FormattedMessage != null)
+        {
+            <div class="message-bubble aura-message">
+                @Html.Raw(ViewBag.FormattedMessage)
+            </div>
+        }
+
+        <!-- Kullanıcının gönderdiği mesaj anında buraya eklenecek -->
+        <div id="temp-user-message" class="message-bubble user-message" style="display: none;"></div>
+
+        <div class="typing-indicator" id="typing-indicator">
+            Aura analiz ediyor, forumları okuyor...
         </div>
     </div>
-}
+
+    <div class="chat-footer">
+        <form method="post" asp-action="Index" id="search-form">
+            <div class="input-group">
+                <input type="text" name="userQuery" id="userQuery" placeholder="Örn: 25.000 TL bütçem var, bataryası iyi telefon öner" autocomplete="off" required>
+                <button type="submit" id="sendBtn">Gönder</button>
+            </div>
+        </form>
+    </div>
+</div>
 
 <script>
-    const messages = [
-        "Teknoloji forumları taranıyor...",
-        "Kullanıcı şikayetleri okunuyor...",
-        "Fiyat geçmişi analiz ediliyor...",
-        "Satıcı güven skorları hesaplanıyor...",
-        "Aura tavsiyesi hazırlanıyor..."
-    ];
+    // Sohbeti her zaman en aşağıda tut
+    function scrollToBottom() {
+        var chatBody = document.getElementById("chat-body");
+        chatBody.scrollTop = chatBody.scrollHeight;
+    }
+    window.onload = scrollToBottom;
 
-    let msgIndex = 0;
-    let interval;
+    // Form gönderildiğinde olacaklar (Muazzam Kullanıcı Deneyimi)
+    document.getElementById('search-form').addEventListener('submit', function (e) {
+        const inputField = document.getElementById('userQuery');
+        const sendBtn = document.getElementById('sendBtn');
+        const tempMsg = document.getElementById('temp-user-message');
+        const typingIndicator = document.getElementById('typing-indicator');
 
-    document.getElementById('search-form').addEventListener('submit', function () {
-        // Formu gizle
-        document.querySelector('.text-center').style.display = 'none';
+        // 1. Yazılan yazıyı alıp anında ekrana (mavi baloncuk olarak) bas
+        tempMsg.textContent = inputField.value;
+        tempMsg.style.display = 'block';
 
-        // Loading ekranını göster
-        const loading = document.getElementById('loading-screen');
-        loading.style.display = 'flex';
+        // 2. Kutu içindeki yazıyı gizle (kullanıcıya gitti hissiyatı vermek için)
+        inputField.style.color = 'transparent';
 
-        // Mesajları döndür
-        interval = setInterval(function () {
-            msgIndex = (msgIndex + 1) % messages.length;
-            const textEl = document.getElementById('loading-text');
-            textEl.style.opacity = '0';
-            setTimeout(function () {
-                textEl.textContent = messages[msgIndex];
-                textEl.style.opacity = '1';
-            }, 300);
-        }, 2000);
+        // 3. Butonu devre dışı bırak (Çift tıklamayı engelle)
+        sendBtn.disabled = true;
+        sendBtn.textContent = 'Bekleyin...';
+
+        // 4. "Aura yazıyor..." göster
+        typingIndicator.style.display = 'block';
+
+        // 5. Ekranı aşağı kaydır
+        scrollToBottom();
     });
-</script>
-<script>
-    // URL'den userQuery parametresi varsa formu otomatik gönder
+
+    // Geçmişten gelen link parametresi varsa
     const urlParams = new URLSearchParams(window.location.search);
     const query = urlParams.get('userQuery');
     if (query) {

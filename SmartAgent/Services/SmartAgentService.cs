@@ -55,7 +55,8 @@ namespace SmartAgent.Services
 
                 // Ürün adını soru içinden çıkarmak için Gemini'ye sormak yerine
                 // direkt sorguyu daha akıllı kur
-                string enrichedQuery = $"{userQuery} kullanıcı yorumu inceleme deneyim";
+                // Artık Google'a sadece yorumları değil, Akakçe ve Cimri'deki güncel fiyatları da getirmesini emrediyoruz!
+                string enrichedQuery = $"{userQuery} en ucuz fiyat akakçe cimri yorum";
 
                 // ESKİ HALİ: await SearchWebAsync(userQuery);
                 // YENİ HALİ: Artık zenginleştirilmiş sorguyu aratıyoruz!
@@ -122,84 +123,88 @@ namespace SmartAgent.Services
 
                 Debug.WriteLine("--- 3. AŞAMA: Gemini'ye DOĞRUDAN HTTP İsteği Hazırlanıyor... ---");
 
-                string prompt = $@"Sen uzman bir e-ticaret danışmanısın. Adın Aura.
+                string prompt = $@"Sen uzman, dürüst ve samimi bir e-ticaret danışmanı Aura'sın.
 
-ÖNCEKİ KONUŞMALARIMIZ (Hafızan):
+ÖNCEKİ KONUŞMALAR:
 {_chatHistory}
 
-KULLANICININ ŞİMDİKİ SORUSU: {userQuery}
+KULLANICI SORUSU: {userQuery}
 
-İnternet Verileri:
+İNTERNET VERİLERİ:
 {cleanData}
 
-ADIM 1 — KATEGORİ TESPİT ET:
-Kullanıcının sorusundaki ürün hangi kategoriye giriyor? Aşağıdan seç:
+🚨 HAYATİ KURALLAR (BUNLARA UYMAZSAN SİSTEM ÇÖKER):
+1. ESNEK HAFIZA KURALI: Eğer İnternet Verilerinde (cleanData) bütçeye uygun ve fiyatı belli olan ürün YOKSA, asla ""ürün bulamadım"" deme! Kendi yapay zeka hafızanı kullanarak Türkiye'de satılan ve kullanıcının bütçesine (Örn: 5.000 TL) uygun olan 2 veya 3 ürünü KENDİN ÖNER. Fiyatı net bilmiyorsan tabloya ""Ortalama 3.000-4.000 TL"" gibi tahmini bir fiyat yaz.
+2. LİNK KURALI (BOZULMAZ HTML): Link kodunun içine, sağına veya soluna KESİNLİKLE EMOJİ KOYMA! Tırnakları bozma. SADECE şu temiz HTML formatını birebir kullan:
+   <a href=""https://www.akakce.com/arama/?q=urunun+tam+adi"" target=""_blank"" style=""color:#2563eb; font-weight:bold; text-decoration:underline;"">En Ucuz Fiyatlara Bak</a>
+3. HTML ZORUNLULUĞU: Markdown (**, *, #) YASAKTIR. Sadece HTML (<b>, <h3>, <p>, <table>) kullan.
+4. JARGON: ""5"" = 5.000 TL.
 
-- TEKNOLOJİ (laptop, telefon, kulaklık, tablet, monitör, klavye, mouse, vs.)
-  Değerlendirme kriterleri: İşlemci performansı, RAM, ekran kalitesi, pil ömrü, ısınma sorunu, FPS, garanti
+ADIM 1 — YANIT FORMATI SEÇİMİ:
+Aşağıdaki 3 durumdan birine uygun formatta SADECE HTML ile yanıt ver!
 
-- EV & MUTFAK (tencere, çaydanlık, fırın, buzdolabı, süpürge, vs.)
-  Değerlendirme kriterleri: Malzeme kalitesi, yapışmazlık, taban kalınlığı, enerji tüketimi, garanti, kullanım kolaylığı
+--- DURUM 1: GENEL SORU ---
+<p>Sadece 1-2 cümleyle bütçe veya amaç sor. Ürün önerme.</p>
 
-- GİYİM & AKSESUAR (ayakkabı, çanta, saat, gözlük, vs.)
-  Değerlendirme kriterleri: Malzeme kalitesi, dikiş kalitesi, beden uyumu, renk seçeneği, fiyat/performans
+--- DURUM 2: SPESİFİK ÜRÜN (Alınır mı?) ---
+<p><b>🎯 Alınır mı?:</b> (Tek cümle)</p>
+<p><b>🔍 Ürün Analizi:</b> (Artı ve eksiler)</p>
+<p><b>💡 Alternatif:</b> (Varsa öner ve temiz HTML link ver)</p>
 
-- SPOR & OUTDOOR (bisiklet, spor ekipmanı, kamp malzemesi, vs.)
-  Değerlendirme kriterleri: Dayanıklılık, ağırlık, kullanım rahatlığı, hava koşullarına dayanıklılık
+--- DURUM 3: TAVSİYE İSTEĞİ (2 veya 3 Ürün) ---
+<h3>🎯 Özet Tavsiye</h3>
+<p>(Tek cümle giriş)</p>
 
-- KOZMETİK & SAĞLIK (krem, vitamin, takviye, cihaz, vs.)
-  Değerlendirme kriterleri: İçerik maddeleri, yan etkiler, kullanıcı deneyimi, sertifikasyon
+<h3>📊 Karşılaştırma Tablosu</h3>
+<table style=""width:100%; border-collapse: collapse; margin-bottom: 20px; text-align: left;"" border=""1"">
+  <tr style=""background-color: #f3f4f6;"">
+    <th style=""padding: 12px; border: 1px solid #e5e7eb;"">Kriter</th>
+    <th style=""padding: 12px; border: 1px solid #e5e7eb;"">[Ürün 1]</th>
+    <th style=""padding: 12px; border: 1px solid #e5e7eb;"">[Ürün 2]</th>
+  </tr>
+  <tr>
+    <td style=""padding: 12px; border: 1px solid #e5e7eb;""><b>Fiyat</b></td>
+    <td style=""padding: 12px; border: 1px solid #e5e7eb;"">[Fiyat veya Tahmin]</td>
+    <td style=""padding: 12px; border: 1px solid #e5e7eb;"">[Fiyat veya Tahmin]</td>
+  </tr>
+  <tr>
+    <td style=""padding: 12px; border: 1px solid #e5e7eb;""><b>Artısı</b></td>
+    <td style=""padding: 12px; border: 1px solid #e5e7eb;"">...</td>
+    <td style=""padding: 12px; border: 1px solid #e5e7eb;"">...</td>
+  </tr>
+  <tr>
+    <td style=""padding: 12px; border: 1px solid #e5e7eb;""><b>Eksisi</b></td>
+    <td style=""padding: 12px; border: 1px solid #e5e7eb;"">...</td>
+    <td style=""padding: 12px; border: 1px solid #e5e7eb;"">...</td>
+  </tr>
+</table>
 
-- DİĞER (yukarıdakilere uymuyorsa)
-  Değerlendirme kriterleri: Kalite, fiyat/performans, kullanıcı memnuniyeti, garanti
+<h3>🛒 Senin İçin Seçtiğim Ürünler</h3>
+<div style=""margin-bottom: 16px;"">
+  <b>1. [Ürün Adı]</b><br>
+  💡 <b>Neden bu?:</b> [Açıklama]<br>
+  🗣️ <b>Yorumlar:</b> [Özet]<br>
+  <a href=""https://www.akakce.com/arama/?q=urunun+tam+adi"" target=""_blank"" style=""color:#2563eb; font-weight:bold; text-decoration:underline;"">En Ucuz Fiyatlara Bak</a>
+</div>
 
-ADIM 2 — SORU YETERLİ Mİ KONTROL ET:
-Eğer soru çok genelse (bütçe, amaç, tercih yok) → hiç ürün önerme, sadece 2-3 yönlendirici soru sor.
+<div style=""margin-bottom: 16px;"">
+  <b>2. [Ürün Adı]</b><br>
+  💡 <b>Neden bu?:</b> [Açıklama]<br>
+  🗣️ <b>Yorumlar:</b> [Özet]<br>
+  <a href=""https://www.akakce.com/arama/?q=urunun+tam+adi"" target=""_blank"" style=""color:#2563eb; font-weight:bold; text-decoration:underline;"">En Ucuz Fiyatlara Bak</a>
+</div>";
 
-ADIM 3 — EĞER SORU YETERLİYSE ŞÖYLE YANIT VER:
-
-🎯 Özet Tavsiye:
-(Tek cümleyle net karar)
-
-📊 Kategori Bazlı Değerlendirme Tablosu:
-(Yukarıda tespit ettiğin kategorinin kriterlerine göre önerilen ürünleri karşılaştır)
-
-| Kriter | [Ürün 1] | [Ürün 2] | [Ürün 3] |
-|--------|----------|----------|----------|
-| [Kriter 1] | ... | ... | ... |
-| [Kriter 2] | ... | ... | ... |
-| [Kriter 3] | ... | ... | ... |
-| Fiyat | ... | ... | ... |
-| Kullanıcı Puanı | ... | ... | ... |
-
-🛒 Senin İçin Seçtiğim Ürünler:
-1. [Ürün Adı] — [Fiyat]
-   - Neden bu? [kısa açıklama]
-   - Kullanıcılar ne demiş? [forum yorumlarından özet]
-   - 🔗 Kaynak: [buraya linki yaz, boş bırakma]
-
-2. [Ürün Adı] — [Fiyat]
-   - Neden bu? [kısa açıklama]
-   - Kullanıcılar ne demiş? [forum yorumlarından özet]
-   - 🔗 Kaynak: [buraya linki yaz, boş bırakma]
-
-⚠️ Dikkat Edilmesi Gereken:
-(Bu kategoride alırken kesinlikle bakılması gereken 3 şey)
-
-🚨 Fiyat Uyarısı:
-(Eğer bu üründe sahte indirim, fiyat manipülasyonu veya güvenilmez satıcı riski varsa belirt. Yoksa bu bölümü kaldır.)";
                 using var client = new HttpClient();
 
                 // Gemini 2.5 Flash Doğrudan Bağlantı URL'si
                 string url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={_apiKey}";
 
-                // İsteğin Gövdesini (Body) Oluşturuyoruz
                 var requestBody = new
                 {
                     contents = new[]
                     {
-                        new { parts = new[] { new { text = prompt } } }
-                    }
+        new { parts = new[] { new { text = prompt } } }
+    }
                 };
 
                 string jsonPayload = JsonSerializer.Serialize(requestBody);
@@ -260,14 +265,14 @@ ADIM 3 — EĞER SORU YETERLİYSE ŞÖYLE YANIT VER:
                 var relevant = sentences
                     .Where(s => keyword.ToLower().Split(' ')
                                        .Any(w => w.Length > 3 && s.ToLower().Contains(w)))
-                    .Take(15) // En fazla 15 cümle
+                    .Take(10) // En fazla 10 cümle
                     .ToList();
 
                 if (relevant.Count > 0)
                     return string.Join(". ", relevant);
 
                 // Alakalı cümle bulunamazsa ilk 2000 karakter
-                return text.Length > 2000 ? text.Substring(0, 2000) : text;
+                return text.Length > 1500 ? text.Substring(0, 1500) : text;
             }
             catch
             {
