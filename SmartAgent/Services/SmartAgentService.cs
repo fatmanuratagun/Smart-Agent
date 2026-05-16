@@ -265,7 +265,7 @@ Kullanıcı iki farklı ürün veya link verip ""Hangisi?"", ""Sence bu mu bu mu
 </table>
 
 <h3>🏆 Aura'nın Kararı</h3>
-<div style=""background-color: #f8fafc; padding: 15px; border-left: 4px solid #3b82f6; border-radius: 4px;"">
+<div style=""background-color: rgba(59, 130, 246, 0.08); padding: 15px; border-left: 4px solid #3b82f6; border-radius: 4px;"">
   <p><b>Kimi Seçmelisin?:</b> Eğer önceliğin [Özellik 1] ise <b>[Ürün 1]</b>, ama [Özellik 2] senin için daha önemliyse kesinlikle <b>[Ürün 2]</b> modelini almalısın.</p>
 </div>";
 
