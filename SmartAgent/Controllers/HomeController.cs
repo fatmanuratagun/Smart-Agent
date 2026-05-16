@@ -93,10 +93,38 @@ namespace SmartAgent.Controllers
                 await _firebase.SaveWarningAsync(userId, userQuery, "fake_discount", "high");
             }
 
-            // FormatResponse YOK — direkt aiResponse
-            return Json(new { html = aiResponse });
+            // Markdown linkleri HTML'e çevir
+            string cleanedResponse = FixBrokenLinks(aiResponse);
+            return Json(new { html = cleanedResponse });
         }
+        private string FixBrokenLinks(string html)
+        {
+            if (string.IsNullOrEmpty(html)) return html;
 
+            // Markdown [metin](url) → HTML link
+            html = System.Text.RegularExpressions.Regex.Replace(
+                html,
+                @"\[([^\]]+)\]\((https?://[^\)]+)\)",
+                "<a href='$2' target='_blank' style='color:#c8f135; font-weight:bold; text-decoration:none;'>$1 ↗</a>"
+            );
+
+            // Bozuk link: "Kaynağa Git ↗ target="_blank" style="...">En Ucuz Fiyatlara Bak"
+            // Bu pattern'i temizle
+            html = System.Text.RegularExpressions.Regex.Replace(
+                html,
+                @"Kaynağa Git ↗[^<]*>([^<]+)",
+                "<a href='#' style='color:#c8f135; font-weight:bold; text-decoration:none;'>$1 ↗</a>"
+            );
+
+            // __[metin](url)__ formatı
+            html = System.Text.RegularExpressions.Regex.Replace(
+                html,
+                @"__\[([^\]]+)\]\((https?://[^\)]+)\)__",
+                "<a href='$2' target='_blank' style='color:#c8f135; font-weight:bold; text-decoration:none;'>$1 ↗</a>"
+            );
+
+            return html;
+        }
 
         private string FormatResponse(string text)
         {
