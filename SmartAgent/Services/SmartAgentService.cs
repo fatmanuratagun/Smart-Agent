@@ -153,7 +153,18 @@ ADIM 1 — YANIT FORMATI SEÇİMİ:
 Aşağıdaki 3 durumdan birine uygun formatta SADECE HTML ile yanıt ver!
 
 --- DURUM 1: GENEL SORU ---
-<p>Sadece 1-2 cümleyle bütçe veya amaç sor. Ürün önerme.</p>
+Kullanıcının sorusunda şunlardan HERHANGİ BİRİ EKSİKSE bu durumu kullan:
+- Ürün tipi/modeli net değil (sırt mı, yan mı, omuz mu, gaming mi?)
+- Kullanım amacı belli değil (okul, iş, spor, günlük?)
+- Marka tercihi sorulmadı
+
+SADECE şu formatta 2-3 soru sor, ürün önerme:
+<p>Harika! Sana en uygun seçeneği bulabilmem için birkaç sorum var:</p>
+<ul>
+  <li>[Soru 1 — ürün tipi: sırt mı, yan mı, omuz mu?]</li>
+  <li>[Soru 2 — kullanım amacı: okul, iş, spor, günlük?]</li>
+  <li>[Soru 3 — marka veya özel tercih var mı?]</li>
+</ul>
 
 --- DURUM 2: SPESİFİK ÜRÜN (Alınır mı?) ---
 <p><b>🎯 Alınır mı?:</b> (Tek cümle)</p>
