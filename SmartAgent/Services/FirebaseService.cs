@@ -45,7 +45,39 @@ namespace SmartAgent.Services
         }
 
         // ─── ARAMA GEÇMİŞİ ───────────────────────────────────────
+        public class AdviceRecord
+        {
+            [JsonPropertyName("product")]
+            public string Product { get; set; } = "";
 
+            [JsonPropertyName("advice")]
+            public string Advice { get; set; } = "";
+
+            [JsonPropertyName("timestamp")]
+            public string Timestamp { get; set; } = "";
+
+            [JsonIgnore]
+            public string FirebaseKey { get; set; } = "";
+        }
+        public async Task<List<AdviceRecord>> GetAdvicesAsync(string userId)
+        {
+            var response = await _http.GetStringAsync(
+                $"{_baseUrl}/users/{userId}/advices.json"
+            );
+
+            if (response == "null") return new List<AdviceRecord>();
+
+            var dict = JsonSerializer.Deserialize<Dictionary<string, AdviceRecord>>(response);
+
+            if (dict == null) return new List<AdviceRecord>();
+
+            foreach (var kvp in dict)
+                kvp.Value.FirebaseKey = kvp.Key;
+
+            return dict.Values
+                       .OrderByDescending(a => a.Timestamp)
+                       .ToList();
+        }
         public async Task SaveSearchAsync(string userId, string query, int resultCount)
         {
             var search = new

@@ -1,89 +1,194 @@
-﻿@model List<SmartAgent.Services.SearchRecord>
-
+﻿@model List<SmartAgent.Controllers.HistoryItem>
 @{
     ViewData["Title"] = "Arama Geçmişim";
+    var advices = ViewBag.FormattedAdvices as Dictionary<string, string>;
 }
 
-<div style="max-width:800px; margin: 40px auto; padding: 0 20px;">
+<style>
+    .history-page {
+        max-width: 760px;
+        margin: 40px auto;
+        padding: 0 24px 60px;
+    }
 
-    <div style="margin-bottom: 32px;">
-        <h1 style="font-size: 28px; font-weight: 600; color: #1a1a2e;">
-            🕓 Arama Geçmişim
-        </h1>
-        <p style="color: #666; margin-top: 6px;">
-            Aura'ya daha önce sorduğun tüm sorgular
-        </p>
-    </div>
+    .history-title {
+        font-family: var(--font-display);
+        font-size: 26px;
+        font-weight: 800;
+        color: var(--text);
+        margin-bottom: 6px;
+    }
+
+    .history-sub {
+        color: var(--muted);
+        font-size: 14px;
+        margin-bottom: 28px;
+    }
+
+    .history-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 16px 20px;
+        margin-bottom: 10px;
+        transition: border-color 0.2s;
+    }
+
+        .history-card:hover {
+            border-color: var(--accent2);
+        }
+
+    .history-icon {
+        width: 40px;
+        height: 40px;
+        background: rgba(124,111,255,0.15);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        margin-right: 14px;
+        flex-shrink: 0;
+    }
+
+    .history-query {
+        font-weight: 600;
+        font-size: 14px;
+        color: var(--text);
+    }
+
+    .history-date {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 3px;
+    }
+
+    .btn-again {
+        padding: 7px 16px;
+        background: var(--accent2);
+        color: white;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 500;
+        white-space: nowrap;
+        transition: opacity 0.2s;
+    }
+
+        .btn-again:hover {
+            opacity: 0.85;
+            color: white;
+        }
+
+    .btn-show {
+        padding: 7px 16px;
+        background: transparent;
+        color: var(--accent);
+        border: 1px solid var(--accent);
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        white-space: nowrap;
+        font-family: var(--font-body);
+        transition: all 0.2s;
+    }
+
+        .btn-show:hover {
+            background: rgba(200,241,53,0.1);
+        }
+
+    .btn-delete {
+        padding: 7px 16px;
+        background: transparent;
+        color: #e53e3e;
+        border: 1px solid #e53e3e;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        white-space: nowrap;
+        font-family: var(--font-body);
+        transition: all 0.2s;
+    }
+
+        .btn-delete:hover {
+            background: rgba(229,62,62,0.1);
+        }
+
+    .advice-panel {
+        display: none;
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid var(--border);
+        font-size: 13px;
+        color: #ccc;
+        line-height: 1.7;
+    }
+
+        .advice-panel a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        color: var(--muted);
+    }
+</style>
+
+<div class="history-page">
+    <div class="history-title">🕓 Arama Geçmişim</div>
+    <div class="history-sub">Aura'ya daha önce sorduğun tüm sorgular</div>
 
     @if (Model == null || !Model.Any())
     {
-        <div style="text-align:center; padding: 60px 20px; background: #f8f9ff;
-                    border-radius: 16px; color: #888;">
-            <div style="font-size: 48px; margin-bottom: 16px;">🔍</div>
-            <p style="font-size: 18px;">Henüz arama yapmadın.</p>
-            <a href="/" style="display:inline-block; margin-top: 16px; padding: 12px 28px;
-                               background: #6c63ff; color: white; border-radius: 10px;
-                               text-decoration: none; font-weight: 500;">
+        <div class="empty-state">
+            <div style="font-size:40px; margin-bottom:12px;">🔍</div>
+            <p>Henüz arama yapmadın.</p>
+            <a href="/" style="display:inline-block; margin-top:14px; padding:10px 24px;
+                               background:var(--accent); color:#0f0f13; border-radius:9px;
+                               text-decoration:none; font-weight:700; font-family:var(--font-display);">
                 İlk aramanı yap
             </a>
         </div>
     }
     else
     {
-        <div style="display: flex; flex-direction: column; gap: 12px;">
-            @foreach (var item in Model)
-            {
-                <div style="background: white; border: 1px solid #eee; border-radius: 14px;
-            padding: 18px 22px; display: flex; align-items: center;
-            justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+        @foreach (var item in Model)
+        {
+            <div class="history-card">
 
-                    <!-- Sol: ikon + metin -->
-                    <div style="display: flex; align-items: center; gap: 14px; flex: 1;">
-                        <div style="width: 42px; height: 42px; background: #f0eeff;
-                    border-radius: 10px; display: flex; align-items: center;
-                    justify-content: center; font-size: 20px;">
-                            🔍
-                        </div>
-                        <div>
-                            <div style="font-weight: 600; font-size: 16px; color: #1a1a2e;">
-                                @item.Query
-                            </div>
-                            <div style="font-size: 13px; color: #999; margin-top: 3px;">
+                <!-- Üst satır -->
+                <div style="display:flex; align-items:center; justify-content:space-between;">
+                    <div style="display:flex; align-items:center; flex:1; min-width:0;">
+                        <div class="history-icon">🔍</div>
+                        <div style="min-width:0;">
+                            <div class="history-query">@item.Query</div>
+                            <div class="history-date">
                                 @DateTime.Parse(item.Timestamp).ToLocalTime().ToString("dd MMM yyyy, HH:mm")
-                            </div>
+                            </div>                            
                         </div>
                     </div>
-
-                    <!-- Sağ: butonlar -->
-                    <div style="display: flex; gap: 8px; align-items: center; flex-shrink: 0;">
-                        <a href="/?userQuery=@Uri.EscapeDataString(item.Query)"
-                           style="padding: 8px 18px; background: #6c63ff; color: white;
-                  border-radius: 8px; text-decoration: none; font-size: 13px;
-                  font-weight: 500; white-space: nowrap;">
+                    <div style="display:flex; gap:8px; flex-shrink:0; margin-left:16px;">                     
+                        <a href="/?userQuery=@Uri.EscapeDataString(item.Query)" class="btn-again">
                             Tekrar ara
                         </a>
-
                         <form method="post" action="/Home/DeleteSearch"
-                              onsubmit="return confirm('Bu aramayı silmek istediğine emin misin?')">
+                              onsubmit="return confirm('Silinsin mi?')">
                             @Html.AntiForgeryToken()
                             <input type="hidden" name="searchId" value="@item.FirebaseKey" />
-                            <button type="submit"
-                                    style="padding: 8px 18px; background: #fff; color: #e53e3e;
-                           border: 1px solid #e53e3e; border-radius: 8px;
-                           font-size: 13px; font-weight: 500; cursor: pointer;
-                           white-space: nowrap;">
-                                Sil
-                            </button>
+                            <button type="submit" class="btn-delete">Sil</button>
                         </form>
                     </div>
-                </div>
-            }
-        </div>
+                </div>              
+            </div>
+        }
     }
 
-    <div style="margin-top: 32px;">
-        <a href="/" style="color: #6c63ff; text-decoration: none; font-size: 14px;">
-            ← Ana sayfaya dön
-        </a>
-    </div>
 </div>
+

@@ -26,7 +26,18 @@ namespace SmartAgent.Controllers
         {
             string userId = "user_1";
             var history = await _firebase.GetSearchHistoryAsync(userId);
-            return View(history);
+            var advices = await _firebase.GetAdvicesAsync(userId);
+
+            // Sorguyu cevabıyla eşleştir
+            var combined = history.Select(h => new HistoryItem
+            {
+                Query = h.Query,
+                Timestamp = h.Timestamp,
+                FirebaseKey = h.FirebaseKey,
+                Advice = advices.FirstOrDefault(a => a.Product == h.Query)?.Advice ?? ""
+            }).ToList();
+
+            return View(combined);
         }
 
         [HttpPost]
@@ -53,7 +64,7 @@ namespace SmartAgent.Controllers
 
             ViewBag.UserQuery = userQuery;
             ViewBag.Message = aiResponse;
-            ViewBag.FormattedMessage = FormatResponse(aiResponse);
+            ViewBag.FormattedMessage = aiResponse;
             return View();
         }
         [HttpPost]
@@ -63,8 +74,30 @@ namespace SmartAgent.Controllers
             await _firebase.DeleteSearchAsync(userId, searchId);
             return RedirectToAction("History");
         }
-        
-        
+        [HttpPost]
+        public async Task<IActionResult> AjaxQuery(string userQuery)
+        {
+            if (string.IsNullOrEmpty(userQuery))
+                return Json(new { html = "<p>Lütfen bir şey yaz.</p>" });
+
+            string aiResponse = await _agentService.GetShoppingAdviceAsync(userQuery);
+
+            string userId = "user_1";
+            await _firebase.SaveSearchAsync(userId, userQuery, aiResponse.Length);
+            await _firebase.SaveAdviceAsync(userId, userQuery, aiResponse);
+
+            if (aiResponse.Contains("uyarı", StringComparison.OrdinalIgnoreCase) ||
+                aiResponse.Contains("dikkat", StringComparison.OrdinalIgnoreCase) ||
+                aiResponse.Contains("sahte", StringComparison.OrdinalIgnoreCase))
+            {
+                await _firebase.SaveWarningAsync(userId, userQuery, "fake_discount", "high");
+            }
+
+            // FormatResponse YOK — direkt aiResponse
+            return Json(new { html = aiResponse });
+        }
+
+
         private string FormatResponse(string text)
         {
             if (string.IsNullOrEmpty(text)) return "";
@@ -134,7 +167,7 @@ namespace SmartAgent.Controllers
                 if (line.StartsWith("🎯") || line.StartsWith("📊") || line.StartsWith("🛒") ||
                     line.StartsWith("⚠️") || line.StartsWith("🚨") || line.StartsWith("⚖️"))
                 {
-                    html.AppendLine($"<div style='font-size:17px; font-weight:600; color:#1a1a2e; margin:20px 0 8px;'>{CleanMarkdown(line)}</div>");
+                    html.AppendLine($"<div style='font-size:15px; font-weight:700; color:#e8e8f0; margin:20px 0 8px; display:flex; align-items:center; gap:8px;'>{CleanMarkdown(line)}</div>");
                     continue;
                 }
 
@@ -153,7 +186,7 @@ namespace SmartAgent.Controllers
                 }
 
                 // Normal satır
-                html.AppendLine($"<div style='color:#444; line-height:1.7;'>{CleanMarkdown(line)}</div>");
+                html.AppendLine($"<div style='color:#c8c8d8; line-height:1.8;'>{CleanMarkdown(line)}</div>");
             }
 
             if (inTable)
@@ -161,30 +194,51 @@ namespace SmartAgent.Controllers
 
             return html.ToString();
         }
-
+        private string FormatAdvice(string text)
+        {
+            if (string.IsNullOrEmpty(text)) return "";
+            // Kalın metin
+            text = System.Text.RegularExpressions.Regex.Replace(
+                text, @"\*\*(.+?)\*\*", "<strong>$1</strong>");
+            // Linkler
+            text = System.Text.RegularExpressions.Regex.Replace(
+                text, @"(https?://[^\s<]+)",
+                "<a href='$1' target='_blank' style='color:var(--accent);'>$1</a>");
+            // Satır sonları
+            text = text.Replace("\n", "<br/>");
+            return text;
+        }
         private string CleanMarkdown(string text)
         {
             if (string.IsNullOrEmpty(text)) return "";
 
-            // Kalın metin **text** → <strong>text</strong>
+            // Kalın metin
             text = System.Text.RegularExpressions.Regex.Replace(
                 text, @"\*\*(.+?)\*\*", "<strong>$1</strong>");
 
-            // İtalik *text* → <em>text</em>
+            // İtalik
             text = System.Text.RegularExpressions.Regex.Replace(
                 text, @"\*(.+?)\*", "<em>$1</em>");
 
-            // Linkler [text](url) → tıklanabilir link
+            // [metin](url) formatı
             text = System.Text.RegularExpressions.Regex.Replace(
                 text, @"\[(.+?)\]\((https?://[^\)]+)\)",
-                "<a href='$2' target='_blank' style='color:#6c63ff; text-decoration:none; font-weight:500;'>$1 🔗</a>");
+                "<a href='$2' target='_blank' style='color:var(--accent); text-decoration:none; font-weight:600;'>$1 ↗</a>");
 
-            // Düz linkler https://... → tıklanabilir
+            // Düz https:// linkleri — bozuk tırnak işaretlerini temizle
             text = System.Text.RegularExpressions.Regex.Replace(
-                text, @"(?<!href=')(https?://[^\s<]+)",
-                "<a href='$1' target='_blank' style='color:#6c63ff; text-decoration:none;'>$1 🔗</a>");
+                text, @"""?(https?://[^\s""<\)]+)""?",
+                "<a href='$1' target='_blank' style='color:var(--accent); text-decoration:none; font-weight:600;'>Kaynağa Git ↗</a>");
 
             return text;
         }
     }
+    public class HistoryItem
+    {
+        public string Query { get; set; } = "";
+        public string Timestamp { get; set; } = "";
+        public string FirebaseKey { get; set; } = "";
+        public string Advice { get; set; } = "";
+    }
+
 }

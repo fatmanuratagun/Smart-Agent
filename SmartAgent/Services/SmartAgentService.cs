@@ -139,6 +139,15 @@ KULLANICI SORUSU: {userQuery}
    <a href=""https://www.akakce.com/arama/?q=urunun+tam+adi"" target=""_blank"" style=""color:#2563eb; font-weight:bold; text-decoration:underline;"">En Ucuz Fiyatlara Bak</a>
 3. HTML ZORUNLULUĞU: Markdown (**, *, #) YASAKTIR. Sadece HTML (<b>, <h3>, <p>, <table>) kullan.
 4. JARGON: ""5"" = 5.000 TL.
+5. BÜTÇE KORUMA KURALI: Kullanıcı bir bütçe belirttiyse (Örn: ""3000 TL"", ""5 bin TL""), 
+   önerdiğin ürünlerin fiyatı bu bütçeyi aşıyorsa cevabın EN BAŞINA şu uyarıyı ekle:
+   <div style=""background:rgba(229,62,62,0.1); border:1px solid #e53e3e; border-radius:10px; 
+               padding:12px 16px; margin-bottom:16px; color:#fc8181; font-size:13px;"">
+   ⚠️ <b>Bütçe Uyarısı:</b> Önerdiğim ürünler belirttiğin bütçeyi aşıyor olabilir. 
+   Piyasa koşulları nedeniyle bu bütçeyle seçenekler kısıtlı — 
+   sana en yakın fiyatlı modelleri getirdim.
+   </div>
+   Eğer tüm öneriler bütçe içindeyse bu uyarıyı KOYMA.
 
 ADIM 1 — YANIT FORMATI SEÇİMİ:
 Aşağıdaki 3 durumdan birine uygun formatta SADECE HTML ile yanıt ver!
@@ -152,6 +161,12 @@ Aşağıdaki 3 durumdan birine uygun formatta SADECE HTML ile yanıt ver!
 <p><b>💡 Alternatif:</b> (Varsa öner ve temiz HTML link ver)</p>
 
 --- DURUM 3: TAVSİYE İSTEĞİ (2 veya 3 Ürün) ---
+<div style=""background:rgba(229,62,62,0.1); border:1px solid #e53e3e; border-radius:10px; 
+            padding:12px 16px; margin-bottom:16px; color:#fc8181; font-size:13px;"">
+⚠️ <b>Bütçe Uyarısı:</b> Önerdiğim ürünler belirttiğin bütçeyi aşıyor olabilir. 
+Piyasa koşulları nedeniyle bu bütçeyle seçenekler kısıtlı — sana en yakın fiyatlı modelleri getirdim.
+</div>
+BU UYARI KUTUSUNU SADECE önerilen ürün fiyatı kullanıcının bütçesini aşıyorsa göster. Bütçe içindeyse tamamen sil.
 <h3>🎯 Özet Tavsiye</h3>
 <p>(Tek cümle giriş)</p>
 
