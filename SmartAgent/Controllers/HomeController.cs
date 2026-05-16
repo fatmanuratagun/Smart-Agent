@@ -15,6 +15,26 @@ namespace SmartAgent.Controllers
             _firebase = firebase;
         }
 
+        // 🚀 SİHİRLİ METOT: Çerezi Okur veya Yeni Kimlik Üretir
+        private string GetOrCreateUserId()
+        {
+            string cookieName = "AuraUserId";
+            string userId = Request.Cookies[cookieName];
+
+            // Eğer tarayıcıda bir kimlik yoksa (siteye ilk kez giriyorsa)
+            if (string.IsNullOrEmpty(userId))
+            {
+                // Rastgele eşsiz bir kimlik üret (Örn: AuraUser_a1b2c3d4)
+                userId = "AuraUser_" + Guid.NewGuid().ToString("N").Substring(0, 8);
+
+                // Bu kimliği 30 gün boyunca tarayıcıda hatırla
+                CookieOptions options = new CookieOptions { Expires = DateTime.Now.AddDays(30) };
+                Response.Cookies.Append(cookieName, userId, options);
+            }
+
+            return userId;
+        }
+
         [HttpGet]
         public IActionResult Index()
         {
@@ -24,7 +44,8 @@ namespace SmartAgent.Controllers
         [HttpGet]
         public async Task<IActionResult> History()
         {
-            string userId = "user_1";
+            // Sabit "user_1" yerine dinamik çerez kimliğini çağırıyoruz
+            string userId = GetOrCreateUserId();
             var history = await _firebase.GetSearchHistoryAsync(userId);
             var advices = await _firebase.GetAdvicesAsync(userId);
 
@@ -39,10 +60,11 @@ namespace SmartAgent.Controllers
 
             return View(combined);
         }
+
         [HttpPost]
         public async Task<IActionResult> DeleteAllSearches()
         {
-            string userId = "user_1";
+            string userId = GetOrCreateUserId();
             await _firebase.DeleteAllSearchesAsync(userId);
             return RedirectToAction("History");
         }
@@ -53,7 +75,7 @@ namespace SmartAgent.Controllers
             if (string.IsNullOrEmpty(searchIds))
                 return RedirectToAction("History");
 
-            string userId = "user_1";
+            string userId = GetOrCreateUserId();
             var ids = searchIds.Split(',');
             foreach (var id in ids)
             {
@@ -72,8 +94,8 @@ namespace SmartAgent.Controllers
             }
 
             string aiResponse = await _agentService.GetShoppingAdviceAsync(userQuery);
+            string userId = GetOrCreateUserId(); // Dinamik kimlik
 
-            string userId = "user_1";
             await _firebase.SaveSearchAsync(userId, userQuery, aiResponse.Length);
             await _firebase.SaveAdviceAsync(userId, userQuery, aiResponse);
 
@@ -89,13 +111,15 @@ namespace SmartAgent.Controllers
             ViewBag.FormattedMessage = aiResponse;
             return View();
         }
+
         [HttpPost]
         public async Task<IActionResult> DeleteSearch(string searchId)
         {
-            string userId = "user_1";
+            string userId = GetOrCreateUserId();
             await _firebase.DeleteSearchAsync(userId, searchId);
             return RedirectToAction("History");
         }
+
         [HttpPost]
         public async Task<IActionResult> AjaxQuery(string userQuery)
         {
@@ -103,8 +127,8 @@ namespace SmartAgent.Controllers
                 return Json(new { html = "<p>Lütfen bir şey yaz.</p>" });
 
             string aiResponse = await _agentService.GetShoppingAdviceAsync(userQuery);
+            string userId = GetOrCreateUserId(); // Dinamik kimlik
 
-            string userId = "user_1";
             await _firebase.SaveSearchAsync(userId, userQuery, aiResponse.Length);
             await _firebase.SaveAdviceAsync(userId, userQuery, aiResponse);
 
@@ -119,6 +143,7 @@ namespace SmartAgent.Controllers
             string cleanedResponse = FixBrokenLinks(aiResponse);
             return Json(new { html = cleanedResponse });
         }
+
         private string FixBrokenLinks(string html)
         {
             if (string.IsNullOrEmpty(html)) return html;
@@ -244,6 +269,7 @@ namespace SmartAgent.Controllers
 
             return html.ToString();
         }
+
         private string FormatAdvice(string text)
         {
             if (string.IsNullOrEmpty(text)) return "";
@@ -258,6 +284,7 @@ namespace SmartAgent.Controllers
             text = text.Replace("\n", "<br/>");
             return text;
         }
+
         private string CleanMarkdown(string text)
         {
             if (string.IsNullOrEmpty(text)) return "";
@@ -283,6 +310,7 @@ namespace SmartAgent.Controllers
             return text;
         }
     }
+
     public class HistoryItem
     {
         public string Query { get; set; } = "";
@@ -290,5 +318,4 @@ namespace SmartAgent.Controllers
         public string FirebaseKey { get; set; } = "";
         public string Advice { get; set; } = "";
     }
-
 }

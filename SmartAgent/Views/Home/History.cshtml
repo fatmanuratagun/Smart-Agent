@@ -1,6 +1,6 @@
 ﻿@model List<SmartAgent.Controllers.HistoryItem>
 @{
-    ViewData["Title"] = "Arama Geçmişim";
+    ViewData["Title"] = "Aura Arşivi"; // Havalı ismimizi buraya da verdik 😎
     var advices = ViewBag.FormattedAdvices as Dictionary<string, string>;
 }
 
@@ -11,12 +11,19 @@
         padding: 0 24px 60px;
     }
 
+    /* Başlık ve butonu yan yana hizalamak için flex ekledik */
+    .history-header-wrapper {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 6px;
+    }
+
     .history-title {
         font-family: var(--font-display);
         font-size: 26px;
         font-weight: 800;
         color: var(--text);
-        margin-bottom: 6px;
     }
 
     .history-sub {
@@ -132,6 +139,30 @@
             background: rgba(229,62,62,0.1);
         }
 
+    /* 🗑️ TÜMÜNÜ SİL BUTONU İÇİN ÖZEL KOYU TEMA STİLİ */
+    .btn-clear-all {
+        padding: 8px 16px;
+        background: rgba(229, 62, 62, 0.1);
+        color: #fc8181;
+        border: 1px solid rgba(229, 62, 62, 0.4);
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: var(--font-body);
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+        .btn-clear-all:hover {
+            background: #e53e3e;
+            color: white;
+            border-color: #e53e3e;
+            box-shadow: 0 4px 12px rgba(229, 62, 62, 0.2);
+        }
+
     .advice-panel {
         display: none;
         margin-top: 16px;
@@ -158,18 +189,32 @@
 </style>
 
 <div class="history-page">
-    <div class="history-title">🕓 Arama Geçmişim</div>
-    <div class="history-sub">Aura'ya daha önce sorduğun tüm sorgular</div>
+
+    <div class="history-header-wrapper">
+        <div class="history-title">📂 Aura Arşivi</div>
+
+        @if (Model != null && Model.Any())
+        {
+            <form method="post" action="/Home/DeleteAllSearches" onsubmit="return confirm('Bütün arama geçmişinizi silmek istediğinize emin misiniz? Bu işlem geri alınamaz.')">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn-clear-all">
+                    <span>Arşivi Temizle</span> 🗑️
+                </button>
+            </form>
+        }
+    </div>
+
+    <div class="history-sub">Aura ile yaptığın tüm akıllı alışveriş keşifleri</div>
 
     @if (Model == null || !Model.Any())
     {
         <div class="empty-state">
             <div style="font-size:40px; margin-bottom:12px;">🔍</div>
-            <p>Henüz arama yapmadın.</p>
+            <p>Arşivinizde henüz kayıtlı bir analiz bulunmuyor.</p>
             <a href="/" style="display:inline-block; margin-top:14px; padding:10px 24px;
-                               background:var(--accent); color:#0f0f13; border-radius:9px;
-                               text-decoration:none; font-weight:700; font-family:var(--font-display);">
-                İlk aramanı yap
+                                   background:var(--accent); color:#0f0f13; border-radius:9px;
+                                   text-decoration:none; font-weight:700; font-family:var(--font-display);">
+                İlk Keşfini Başlat
             </a>
         </div>
     }
@@ -178,8 +223,6 @@
         @foreach (var item in Model)
         {
             <div class="history-card">
-
-                <!-- Üst satır -->
                 <div style="display:flex; align-items:center; justify-content:space-between;">
                     <div style="display:flex; align-items:center; flex:1; min-width:0;">
                         <div class="history-icon">🔍</div>
@@ -187,26 +230,25 @@
                             <div class="history-query" onclick="toggleQuery(this)">@item.Query</div>
                             <div class="history-date">
                                 @DateTime.Parse(item.Timestamp).ToLocalTime().ToString("dd MMM yyyy, HH:mm")
-                            </div>                                                      
+                            </div>
                         </div>
                     </div>
-                    <div style="display:flex; gap:8px; flex-shrink:0; margin-left:16px;">                     
+                    <div style="display:flex; gap:8px; flex-shrink:0; margin-left:16px;">
                         <a href="/?userQuery=@Uri.EscapeDataString(item.Query)" class="btn-again">
                             Tekrar ara
                         </a>
-                        <form method="post" action="/Home/DeleteSearch"
-                              onsubmit="return confirm('Silinsin mi?')">
+                        <form method="post" action="/Home/DeleteSearch" onsubmit="return confirm('Bu kaydı silmek istiyor musunuz?')">
                             @Html.AntiForgeryToken()
                             <input type="hidden" name="searchId" value="@item.FirebaseKey" />
                             <button type="submit" class="btn-delete">Sil</button>
                         </form>
                     </div>
-                </div>              
+                </div>
             </div>
         }
     }
-
 </div>
+
 <script>
     function toggleQuery(el) {
         el.classList.toggle('expanded');
