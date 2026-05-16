@@ -9,7 +9,11 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
         :root {
             --bg: #0f0f13;
@@ -22,6 +26,148 @@
             --muted: #6b6b80;
             --font-display: 'Syne', sans-serif;
             --font-body: 'DM Sans', sans-serif;
+        }
+
+        [data-theme="light"] {
+            --bg: #f0f2f5;
+            --sidebar: #ffffff;
+            --card: #ffffff;
+            --border: #e0e0e8;
+            --accent: #4a8a00;
+            --accent2: #5a54d0;
+            --text: #1a1a2e;
+            --muted: #8888a0;
+        }
+
+            [data-theme="light"] body {
+                background: var(--bg);
+            }
+
+            [data-theme="light"] .bubble-aura {
+                background: #ffffff;
+                border-color: #e0e0e8;
+                color: #1a1a2e;
+            }
+
+                [data-theme="light"] .bubble-aura td {
+                    color: #333;
+                }
+
+                [data-theme="light"] .bubble-aura p {
+                    color: #333;
+                }
+
+                [data-theme="light"] .bubble-aura b {
+                    color: #1a1a2e;
+                }
+
+                [data-theme="light"] .bubble-aura h3 {
+                    color: #1a1a2e;
+                }
+
+                [data-theme="light"] .bubble-aura strong {
+                    color: #1a1a2e;
+                }
+
+            [data-theme="light"] .welcome-bubble {
+                background: #ffffff;
+                border-color: #e0e0e8;
+            }
+
+                [data-theme="light"] .welcome-bubble p {
+                    color: #666;
+                }
+
+            [data-theme="light"] .chat-body {
+                background: #f0f2f5;
+            }
+
+            [data-theme="light"] .chat-header {
+                background: #ffffff;
+            }
+
+            [data-theme="light"] .chat-input-area {
+                background: #ffffff;
+            }
+
+            [data-theme="light"] .input-row {
+                background: #f5f5f7;
+                border-color: #e0e0e8;
+            }
+
+                [data-theme="light"] .input-row input {
+                    color: #1a1a2e;
+                }
+
+            [data-theme="light"] .loading-bubble {
+                background: #ffffff;
+                border-color: #e0e0e8;
+            }
+
+            [data-theme="light"] .history-card {
+                background: #ffffff;
+                border-color: #e0e0e8;
+            }
+
+            [data-theme="light"] .history-query {
+                color: #1a1a2e;
+            }
+
+        /* Toggle switch */
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.2s;
+        }
+
+        .toggle-label {
+            font-size: 12px;
+            color: var(--muted);
+            font-weight: 500;
+            white-space: nowrap;
+        }
+            .theme-toggle:hover {
+                background: var(--card);
+            }
+
+        .toggle-switch {
+            width: 36px;
+            height: 20px;
+            background: var(--border);
+            border-radius: 10px;
+            position: relative;
+            transition: background 0.3s;
+            flex-shrink: 0;
+        }
+
+            .toggle-switch::after {
+                content: '';
+                position: absolute;
+                width: 14px;
+                height: 14px;
+                background: white;
+                border-radius: 50%;
+                top: 3px;
+                left: 3px;
+                transition: transform 0.3s;
+            }
+
+            .toggle-switch.on {
+                background: var(--accent);
+            }
+
+                .toggle-switch.on::after {
+                    transform: translateX(16px);
+                }
+
+        .toggle-label {
+            font-size: 13px;
+            color: var(--muted);
+            font-weight: 500;
         }
 
         html, body {
@@ -38,7 +184,6 @@
             overflow: hidden;
         }
 
-        /* ── SIDEBAR ── */
         .sidebar {
             width: 240px;
             min-width: 240px;
@@ -60,17 +205,17 @@
             border-bottom: 1px solid var(--border);
         }
 
-        .sidebar-logo span {
-            color: var(--text);
-            opacity: 0.4;
-            font-size: 11px;
-            font-weight: 400;
-            display: block;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            margin-top: 2px;
-            font-family: var(--font-body);
-        }
+            .sidebar-logo span {
+                color: var(--text);
+                opacity: 0.4;
+                font-size: 11px;
+                font-weight: 400;
+                display: block;
+                letter-spacing: 2px;
+                text-transform: uppercase;
+                margin-top: 2px;
+                font-family: var(--font-body);
+            }
 
         .sidebar-nav {
             padding: 20px 12px;
@@ -80,43 +225,47 @@
             gap: 4px;
         }
 
-        .sidebar-nav a {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 14px;
-            border-radius: 10px;
-            color: var(--muted);
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
+            .sidebar-nav a {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 10px 14px;
+                border-radius: 10px;
+                color: var(--muted);
+                text-decoration: none;
+                font-size: 14px;
+                font-weight: 500;
+                transition: all 0.2s;
+            }
 
-        .sidebar-nav a:hover {
-            background: var(--card);
-            color: var(--text);
-        }
+                .sidebar-nav a:hover {
+                    background: var(--card);
+                    color: var(--text);
+                }
 
-        .sidebar-nav a.active {
-            background: rgba(200, 241, 53, 0.1);
-            color: var(--accent);
-        }
+                .sidebar-nav a.active {
+                    background: rgba(200, 241, 53, 0.1);
+                    color: var(--accent);
+                }
 
-        .sidebar-nav a .icon {
-            font-size: 16px;
-            width: 20px;
-            text-align: center;
-        }
+                .sidebar-nav a .icon {
+                    font-size: 16px;
+                    width: 20px;
+                    text-align: center;
+                }
 
         .sidebar-footer {
-            padding: 16px 24px;
+            padding: 12px;
             border-top: 1px solid var(--border);
-            font-size: 12px;
-            color: var(--muted);
         }
 
-        /* ── MAIN ── */
+        .sidebar-copyright {
+            font-size: 11px;
+            color: var(--muted);
+            text-align: center;
+            padding: 8px 0 0;
+        }
+
         .main-content {
             flex: 1;
             overflow-y: auto;
@@ -124,13 +273,17 @@
             flex-direction: column;
         }
 
-        footer { display: none; }
-        header { display: none; }
+        footer {
+            display: none;
+        }
+
+        header {
+            display: none;
+        }
     </style>
 </head>
 <body>
     <div class="app-shell">
-        <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-logo">
                 Aura
@@ -145,11 +298,15 @@
                 </a>
             </nav>
             <div class="sidebar-footer">
-                © 2026 Aura
+                <div class="theme-toggle" onclick="toggleTheme()">
+                    <span style="font-size:16px;" id="theme-icon">☀️</span>
+                    <span class="toggle-label" id="theme-label">Aydınlık Mod</span>
+                    <div class="toggle-switch" id="toggle-switch"></div>
+                </div>
+                <div class="sidebar-copyright">© 2026 Aura</div>
             </div>
         </aside>
 
-        <!-- İçerik -->
         <main class="main-content">
             @RenderBody()
         </main>
@@ -158,6 +315,38 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script>
+                const savedTheme = localStorage.getItem('aura-theme');
+        if (savedTheme === 'light') applyLight(false);
+        else applyDark(false);
+
+        function toggleTheme() {
+            const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+            if (isLight) {
+                applyDark(true);
+            } else {
+                applyLight(true);
+            }
+        }
+
+        function applyLight(save) {
+            document.documentElement.setAttribute('data-theme', 'light');
+            document.getElementById('theme-icon').textContent = '🌙';
+            document.getElementById('theme-label').textContent = 'Karanlık Mod\'a Geç';
+            document.getElementById('toggle-switch').classList.add('on');
+            if (save) localStorage.setItem('aura-theme', 'light');
+        }
+
+        function applyDark(save) {
+            document.documentElement.removeAttribute('data-theme');
+            document.getElementById('theme-icon').textContent = '☀️';
+            document.getElementById('theme-label').textContent = 'Aydınlık Mod\'a Geç';
+            document.getElementById('toggle-switch').classList.remove('on');
+            if (save) localStorage.setItem('aura-theme', 'dark');
+        }
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

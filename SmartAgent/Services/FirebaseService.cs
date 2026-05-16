@@ -125,6 +125,16 @@ namespace SmartAgent.Services
                        .OrderByDescending(s => s.Timestamp)
                        .ToList();
         }
+        public async Task DeleteAllSearchesAsync(string userId)
+        {
+            await _http.DeleteAsync(
+                $"{_baseUrl}/users/{userId}/searchHistory.json"
+            );
+            await _http.DeleteAsync(
+                $"{_baseUrl}/users/{userId}/advices.json"
+            );
+        }
+
         // ─── AURA TAVSİYELERİ ────────────────────────────────────
 
         public async Task SaveAdviceAsync(string userId, string product, string advice)

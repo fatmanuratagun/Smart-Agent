@@ -39,6 +39,28 @@ namespace SmartAgent.Controllers
 
             return View(combined);
         }
+        [HttpPost]
+        public async Task<IActionResult> DeleteAllSearches()
+        {
+            string userId = "user_1";
+            await _firebase.DeleteAllSearchesAsync(userId);
+            return RedirectToAction("History");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteSelectedSearches(string searchIds)
+        {
+            if (string.IsNullOrEmpty(searchIds))
+                return RedirectToAction("History");
+
+            string userId = "user_1";
+            var ids = searchIds.Split(',');
+            foreach (var id in ids)
+            {
+                await _firebase.DeleteSearchAsync(userId, id.Trim());
+            }
+            return RedirectToAction("History");
+        }
 
         [HttpPost]
         public async Task<IActionResult> Index(string userQuery)

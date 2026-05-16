@@ -55,7 +55,23 @@
         font-weight: 600;
         font-size: 14px;
         color: var(--text);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 450px;
+        cursor: pointer;
+        transition: color 0.2s;
     }
+
+        .history-query:hover {
+            color: var(--accent);
+        }
+
+        .history-query.expanded {
+            white-space: normal;
+            overflow: visible;
+            text-overflow: unset;
+        }
 
     .history-date {
         font-size: 12px;
@@ -168,10 +184,10 @@
                     <div style="display:flex; align-items:center; flex:1; min-width:0;">
                         <div class="history-icon">🔍</div>
                         <div style="min-width:0;">
-                            <div class="history-query">@item.Query</div>
+                            <div class="history-query" onclick="toggleQuery(this)">@item.Query</div>
                             <div class="history-date">
                                 @DateTime.Parse(item.Timestamp).ToLocalTime().ToString("dd MMM yyyy, HH:mm")
-                            </div>                            
+                            </div>                                                      
                         </div>
                     </div>
                     <div style="display:flex; gap:8px; flex-shrink:0; margin-left:16px;">                     
@@ -191,4 +207,8 @@
     }
 
 </div>
-
+<script>
+    function toggleQuery(el) {
+        el.classList.toggle('expanded');
+    }
+</script>
