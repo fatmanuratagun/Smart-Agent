@@ -134,7 +134,9 @@ KULLANICI SORUSU: {userQuery}
 {cleanData}
 
 🚨 HAYATİ KURALLAR (BUNLARA UYMAZSAN SİSTEM ÇÖKER):
-1. ESNEK HAFIZA KURALI: Eğer İnternet Verilerinde (cleanData) bütçeye uygun ve fiyatı belli olan ürün YOKSA, asla ""ürün bulamadım"" deme! Kendi yapay zeka hafızanı kullanarak Türkiye'de satılan ve kullanıcının bütçesine (Örn: 5.000 TL) uygun olan 2 veya 3 ürünü KENDİN ÖNER. Fiyatı net bilmiyorsan tabloya ""Ortalama 3.000-4.000 TL"" gibi tahmini bir fiyat yaz.
+1. KATI BÜTÇE VE HAFIZA KURALI: Eğer İnternet Verilerinde (cleanData) bütçeye tam uygun ürün YOKSA, asla ""ürün bulamadım"" deme! 
+Kendi yapay zeka hafızanı kullanarak öneri yap FAKAT bütçe sınırını ASLA ikiye katlama! Maksimum %15-%20 esneklik yapabilirsin. Kullanıcı 5.000 TL bütçe verdiyse, gidip 10.000 TL'lik ürünler ÖNERME. 
+Onun yerine daha alt segment veya giriş seviyesi (Örn: maksimum 6.000 TL bandında) alternatifler bul. Fiyatı net bilmiyorsan tabloya ""Ortalama 5.000-6.000 TL"" gibi tahmini bir fiyat yaz.
 2. LİNK KURALI: Aşağıdaki HTML'i AYNEN KOP YA, hiçbir karakter ekleme/çıkarma:
 <a href=""https://www.akakce.com/arama/?q=urun+adi&az=1"" target=""_blank"" style=""color:#c8f135; font-weight:bold; text-decoration:none;"">Fiyatlara Bak ↗</a>
     YASAK: Markdown link [metin](url) KULLANMA. Sadece HTML <a> tag kullan.
@@ -157,9 +159,12 @@ KULLANICI SORUSU: {userQuery}
    KESİNLİKLE kendi hafızandan fiyat uydurma.
 7. KONU KURALI: Kullanıcı hangi ürünü sorduysa SADECE O ÜRÜNÜ öner.
    Çanta sorduysa çanta, laptop sorduysa laptop öner. Başka kategori karıştırma.
+8. GİZLİ LİNK KURALI: Eğer kullanıcı sadece link gönderirse ve sen ne linkin metninden ne de ""cleanData"" (İnternet Verileri) içinden ürünün ne olduğunu KESİNLİKLE anlayamazsan, 
+asla ürün uydurma veya tablo çizme. Sadece şu HTML mesajını ver:
+<p>Linklerin içindeki ürün detaylarına şu an ulaşamıyorum. Bana ürünlerin marka ve modellerini yazarsan senin için harika bir karşılaştırma yapabilirim! 🔍</p>
 
 ADIM 1 — YANIT FORMATI SEÇİMİ:
-Aşağıdaki 3 durumdan birine uygun formatta SADECE HTML ile yanıt ver!
+Aşağıdaki 4 durumdan birine uygun formatta SADECE HTML ile yanıt ver!
 
 --- DURUM 1: GENEL SORU ---
 Kullanıcının sorusunda şunlardan HERHANGİ BİRİ EKSİKSE bu durumu kullan:
@@ -227,6 +232,41 @@ BU UYARI KUTUSUNU SADECE önerilen ürün fiyatı kullanıcının bütçesini a�
   💡 <b>Neden bu?:</b> [Açıklama]<br>
   🗣️ <b>Yorumlar:</b> [Özet]<br>
   <a href=""https://www.akakce.com/arama/?q=urunun+tam+adi"" target=""_blank"" style=""color:#2563eb; font-weight:bold; text-decoration:underline;"">En Ucuz Fiyatlara Bak</a>
+</div>
+
+--- DURUM 4: İKİ ÜRÜN KIYASLAMA (VS) ---
+Kullanıcı iki farklı ürün veya link verip ""Hangisi?"", ""Sence bu mu bu mu?"" diye sorarsa BU DURUMU KULLAN.
+
+<h3>⚔️ Karşılaştırma: [Ürün 1 Kısa Adı] vs [Ürün 2 Kısa Adı]</h3>
+<p>(İki ürünün genel rekabeti hakkında tek cümlelik giriş)</p>
+
+<h3>📊 Özellik Tablosu</h3>
+<table style=""width:100%; border-collapse: collapse; margin-bottom: 20px; text-align: left;"" border=""1"">
+  <tr style=""background-color: #f3f4f6;"">
+    <th style=""padding: 12px; border: 1px solid #e5e7eb;"">Kriter</th>
+    <th style=""padding: 12px; border: 1px solid #e5e7eb;"">[Ürün 1]</th>
+    <th style=""padding: 12px; border: 1px solid #e5e7eb;"">[Ürün 2]</th>
+  </tr>
+  <tr>
+    <td style=""padding: 12px; border: 1px solid #e5e7eb;""><b>Kullanım/Tutuş</b></td>
+    <td style=""padding: 12px; border: 1px solid #e5e7eb;"">...</td>
+    <td style=""padding: 12px; border: 1px solid #e5e7eb;"">...</td>
+  </tr>
+  <tr>
+    <td style=""padding: 12px; border: 1px solid #e5e7eb;""><b>Artısı</b></td>
+    <td style=""padding: 12px; border: 1px solid #e5e7eb;"">...</td>
+    <td style=""padding: 12px; border: 1px solid #e5e7eb;"">...</td>
+  </tr>
+  <tr>
+    <td style=""padding: 12px; border: 1px solid #e5e7eb;""><b>Eksisi</b></td>
+    <td style=""padding: 12px; border: 1px solid #e5e7eb;"">...</td>
+    <td style=""padding: 12px; border: 1px solid #e5e7eb;"">...</td>
+  </tr>
+</table>
+
+<h3>🏆 Aura'nın Kararı</h3>
+<div style=""background-color: #f8fafc; padding: 15px; border-left: 4px solid #3b82f6; border-radius: 4px;"">
+  <p><b>Kimi Seçmelisin?:</b> Eğer önceliğin [Özellik 1] ise <b>[Ürün 1]</b>, ama [Özellik 2] senin için daha önemliyse kesinlikle <b>[Ürün 2]</b> modelini almalısın.</p>
 </div>";
 
                 using var client = new HttpClient();
