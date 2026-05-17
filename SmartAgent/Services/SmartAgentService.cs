@@ -4,21 +4,27 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
-// DİKKAT: Eski Mscc.GenerativeAI kütüphanesini sildiğimiz için using kısmından da kaldırdık.
+using System.Linq;
+using System.Collections.Generic;
 
 namespace SmartAgent.Services
 {
     public class SmartAgentService
     {
-        private readonly string _apiKey;
+        // ARTIK TEK BİR STRİNG YERİNE ANAHTAR HAVUZU (LIST) TUTUYORUZ
+        private readonly List<string> _apiKeys;
         private readonly string _serperApiKey;
-        // YENİ EKLENEN HAFIZA DEĞİŞKENİ (Aura'nın Not Defteri)
         private static string _chatHistory = "";
-
 
         public SmartAgentService(IConfiguration configuration)
         {
-            _apiKey = configuration["GeminiSettings:ApiKey"];
+            // appsettings.json dosyasındaki virgüllü keyleri okuyup listeye çeviriyoruz
+            var rawKeys = configuration["GeminiSettings:ApiKey"] ?? "";
+            _apiKeys = rawKeys.Split(',')
+                              .Select(k => k.Trim())
+                              .Where(k => !string.IsNullOrEmpty(k))
+                              .ToList();
+
             _serperApiKey = configuration["SerperSettings:ApiKey"];
         }
 
@@ -53,20 +59,13 @@ namespace SmartAgent.Services
             {
                 Debug.WriteLine("--- 1. AŞAMA: İnternette arama başlatılıyor... ---");
 
-                // Ürün adını soru içinden çıkarmak için Gemini'ye sormak yerine
-                // direkt sorguyu daha akıllı kur
-                // Artık Google'a sadece yorumları değil, Akakçe ve Cimri'deki güncel fiyatları da getirmesini emrediyoruz!
                 string enrichedQuery = $"{userQuery} en ucuz fiyat akakçe cimri yorum";
-
-                // ESKİ HALİ: await SearchWebAsync(userQuery);
-                // YENİ HALİ: Artık zenginleştirilmiş sorguyu aratıyoruz!
                 string searchResultsJson = await SearchWebAsync(enrichedQuery);
 
                 Debug.WriteLine("--- 2. AŞAMA: Arama bitti, sonuçlar geldi. ---");
 
                 if (searchResultsJson == "Arama yapılamadı.") return "İnternete bağlanılamadı, API anahtarlarını kontrol et.";
 
-                // Veriyi Temizleme İşlemi
                 string cleanData = "";
                 try
                 {
@@ -79,13 +78,12 @@ namespace SmartAgent.Services
                                 string title = result.TryGetProperty("title", out JsonElement t) ? t.GetString() : "";
                                 string snippet = result.TryGetProperty("snippet", out JsonElement s) ? s.GetString() : "";
                                 string link = result.TryGetProperty("link", out JsonElement l) ? l.GetString() : "";
-                                // Güvenilir yorum kaynaklarını öncelikle çek
-                                // Atlanacak siteler — reklam, sosyal medya, e-ticaret platformları
+
                                 string[] skipSources = {
-    "trendyol.com", "hepsiburada.com", "amazon.com", "n11.com",
-    "facebook.com", "twitter.com", "instagram.com", "youtube.com",
-    "google.com", "wikipedia.org"
-};
+                                    "trendyol.com", "hepsiburada.com", "amazon.com", "n11.com",
+                                    "facebook.com", "twitter.com", "instagram.com", "youtube.com",
+                                    "google.com", "wikipedia.org"
+                                };
 
                                 bool shouldSkip = skipSources.Any(s => link.Contains(s));
 
@@ -93,11 +91,9 @@ namespace SmartAgent.Services
                                 {
                                     string pageContent = await FetchPageContentAsync(link, userQuery);
 
-                                    // Sayfa içeriği kullanıcının sorusuyla alakalı mı kontrol et
                                     bool isRelevant = false;
                                     if (!string.IsNullOrEmpty(pageContent))
                                     {
-                                        // Kullanıcının sorgusundaki kelimelerin en az birini içeriyor mu?
                                         var queryWords = userQuery.ToLower()
                                                                   .Split(' ')
                                                                   .Where(w => w.Length > 3)
@@ -111,7 +107,6 @@ namespace SmartAgent.Services
                                     }
                                     else
                                     {
-                                        // Alakasızsa sadece snippet kullan
                                         cleanData += $"- BAŞLIK: {title}\n  KAYNAK LİNK: {link}\n  BİLGİ: {snippet}\n\n";
                                     }
                                 }
@@ -134,13 +129,17 @@ KULLANICI SORUSU: {userQuery}
 {cleanData}
 
 🚨 HAYATİ KURALLAR (BUNLARA UYMAZSAN SİSTEM ÇÖKER):
-1. KATI BÜTÇE VE HAFIZA KURALI: Eğer İnternet Verilerinde (cleanData) bütçeye tam uygun ürün YOKSA, asla ""ürün bulamadım"" deme! 
-Kendi yapay zeka hafızanı kullanarak öneri yap FAKAT bütçe sınırını ASLA ikiye katlama! Maksimum %15-%20 esneklik yapabilirsin. Kullanıcı 5.000 TL bütçe verdiyse, gidip 10.000 TL'lik ürünler ÖNERME. 
-Onun yerine daha alt segment veya giriş seviyesi (Örn: maksimum 6.000 TL bandında) alternatifler bul. Fiyatı net bilmiyorsan tabloya ""Ortalama 5.000-6.000 TL"" gibi tahmini bir fiyat yaz.
-2. LİNK KURALI: Aşağıdaki HTML'i AYNEN KOP YA, hiçbir karakter ekleme/çıkarma:
+1. KATI BÜTÇE VE HAFIZA KURALI: Eğer İnternet Verilerinde (cleanData) bütçeye tam uygun ürün YOKSA, kendi yapay zeka hafızanı kullanarak öneri yap. FAKAT bütçe sınırını korumak için normalde pahalı olan premium/kablosuz modelleri (Örn: Logitech G Pro X Wireless, SteelSeries Arctis Nova 7 gibi 8.000 TL'lik ürünleri) KESİNLİKLE SEÇME ve bunların fiyatını feyk şekilde bütçeye uygunmuş gibi uydurma! Hafızandan ürün seçeceksen, o bütçe segmentinin gerçek ürünlerini (Örn: 5.000 TL bütçe için kablolu HyperX Cloud III, Razer BlackShark V2, SteelSeries Arctis Nova 1 veya 3 gibi gerçekten o banda yakın modelleri) seç.
+2. LİNK KURALI: Aşağıdaki HTML'i AYNEN KOPYA, hiçbir karakter ekleme/çıkarma:
 <a href=""https://www.akakce.com/arama/?q=urun+adi&az=1"" target=""_blank"" style=""color:#c8f135; font-weight:bold; text-decoration:none;"">Fiyatlara Bak ↗</a>
+    *KRİTİK URL OPTİMİZASYONU*: ""urun+adi"" kısmını doldururken ""2-3 kişilik"", ""otomatik"", ""kamp"", ""gaming"" gibi uzun ve gereksiz sıfatları temizle. FAKAT markanın diğer sektörlerdeki ürünleriyle karışmaması için (Örn: Çadır yerine buz sandığı, laptop yerine monitör çıkmaması için) MUTLAKA şu formatı koru: ""Marka + Varsa Model + Tek Kelime Ana Kategori"". Kelimelerin arasına artı (+) işareti koy.
+    Doğru Örnekler:
+    - ""Coleman+Cobra+Cadir"" (Sadece ""Coleman+Cobra"" yazma, buz sandığı çıkar!)
+    - ""Quechua+Arpenaz+Cadir""
+    - ""HP+Victus+Laptop""
+    - ""Xiaomi+Airfryer""
     YASAK: Markdown link [metin](url) KULLANMA. Sadece HTML <a> tag kullan.
-    Google linki — kullanıcı tam ürünü bulsun diye:
+Google linki — kullanıcı tam ürünü bulsun diye:
 <a href=""https://www.google.com/search?q=urun+adi+buraya+fiyat+satin+al&gl=tr"" target=""_blank"" style=""color:#7c6fff; font-weight:bold; text-decoration:none; margin-left:10px;"">Google'da Ara ↗</a>
 
 3. HTML ZORUNLULUĞU: Markdown (**, *, #) YASAKTIR. Sadece HTML (<b>, <h3>, <p>, <table>) kullan.
@@ -154,14 +153,17 @@ Onun yerine daha alt segment veya giriş seviyesi (Örn: maksimum 6.000 TL band�
    sana en yakın fiyatlı modelleri getirdim.
    </div>
    Eğer tüm öneriler bütçe içindeyse bu uyarıyı KOYMA.
-6. FİYAT KURALI: Fiyat bilgisini KESİNLİKLE sadece İNTERNET VERİLERİ'nden al.
-   İnternet verilerinde fiyat yoksa ""Güncel fiyat için siteyi ziyaret edin"" yaz.
-   KESİNLİKLE kendi hafızandan fiyat uydurma.
-7. KONU KURALI: Kullanıcı hangi ürünü sorduysa SADECE O ÜRÜNÜ öner.
-   Çanta sorduysa çanta, laptop sorduysa laptop öner. Başka kategori karıştırma.
-8. GİZLİ LİNK KURALI: Eğer kullanıcı sadece link gönderirse ve sen ne linkin metninden ne de ""cleanData"" (İnternet Verileri) içinden ürünün ne olduğunu KESİNLİKLE anlayamazsan, 
+6. FİYAT KURALI VE RAKAM UYDURMA YASAĞI: Fiyat alanına rakamsal bir değer (Örn: 4.500 TL veya 5.000 TL) yazacaksan bunu KESİNLİKLE sadece İNTERNET VERİLERİ'nden (cleanData) almalısın. Eğer internet verilerinde o ürüne ait net bir fiyat dönmediyse, fiyat kısmına KESİNLİKLE kendi hafızandan tahmini veya hayali rakamlar YAZMA! Fiyat satırına/sütununa sadece ""Güncel fiyat için siteyi ziyaret edin"" yaz. Rakam uydurmak kesinlikle yasaktır.
+7. KONU VE KATEGORİ KORUMA KURALI: Kullanıcı aynı sorgu içinde tamamen alakasız iki farklı kategori sorsa bile (Örn: ""Kamp çadırı ve kedi maması""), KESİNLİKLE kategorileri karıştırma! Sadece ana e-ticaret ürününe (Örn: Kamp çadırına) odaklan. Kedi maması kısmını tamamen görmezden gel veya ""Ben sadece teknoloji/kamp/moda gibi ana e-ticaret ürünlerinde uzmanım, kedi maması öneremem"" diyerek kibar ortak bir cümleyle geçiştir. Cevapta asla iki farklı kategoriye ait tablo veya liste OLAMAZ.
+8. GIZLI LİNK KURALI: Eğer kullanıcı sadece link gönderirse ve sen ne linkin metninden ne de ""cleanData"" (İnternet Verileri) içinden ürünün ne olduğunu KESİNLİKLE anlayamazsan, 
 asla ürün uydurma veya tablo çizme. Sadece şu HTML mesajını ver:
 <p>Linklerin içindeki ürün detaylarına şu an ulaşamıyorum. Bana ürünlerin marka ve modellerini yazarsan senin için harika bir karşılaştırma yapabilirim! 🔍</p>
+
+9. BÜTÇE UÇURUMU VE SPESİFİK MARKA MODEL ZORUNLULUĞU KURALI:
+   - Kullanıcının istediği spesifik donanım/ürün ile belirttiği bütçe arasında UÇURUM/İMKANSIZLIK varsa (Örn: 1.000 TL'ye RTX 4050 laptop istemek), kesinlikle hayali fiyatlar uydurma veya 1.000 TL'ye Chromebook satmaya çalışma! Kullanıcıya bu bütçeyle o ürünün alınmasının imkansız olduğunu dürüst ve net bir şekilde söyle.
+   - Kullanıcının bütçesi o kategori için MAKUL ve GERÇEKÇİ ise (Örn: 30.000 TL bütçeye laptop istemek), kullanıcının istediği model bütçeyi aşsa bile kestirip atma! KESİNLİKLE ""Giriş Seviyesi Oyun Dizüstü"" gibi yuvarlak genel kategori adları yazma. İnternet verilerini tara veya kendi güçlü hafızanı kullanıp o bütçeye (Örn: 30.000 TL'ye) gerçekten alınabilecek en iyi ve GERÇEK SPESİFİK MARKA/MODELLERİ (Örn: ""HP Victus 15"", ""Acer Nitro 5"", ""Lenovo LOQ"" gibi) doğrudan tam isimleriyle seçerek kullanıcıya öner.
+   - Önerdiğin her ürünün adı mutlaka TEK VE GERÇEK BİR MODEL olmalı. Asla ""Everest / Piranha / Ranger"" gibi markaları eğik çizgiyle birleştirerek yuvarlak grup isimleri yazma. Sadece tek birini seç: Örn: ""Quechua Arpenaz 3"". 
+*ÖNEMLİ MARKA SEÇİM KURALI: Önerdiğin markaların Akakçe'de kesinlikle karşılığı olmalı. Bilgisayarda (HP, ASUS, Lenovo, Acer, Dell), Çadırda (Quechua, Coleman, Husky, Decathlon) gibi piyasada resmi kataloğu bulunan büyük ve bilindik markaları seç. Everest gibi sadece pazaryerlerinde spot satılan fason markaları asla listeleme.*
 
 ADIM 1 — YANIT FORMATI SEÇİMİ:
 Aşağıdaki 4 durumdan birine uygun formatta SADECE HTML ile yanıt ver!
@@ -199,8 +201,8 @@ BU UYARI KUTUSUNU SADECE önerilen ürün fiyatı kullanıcının bütçesini a�
 <table style=""width:100%; border-collapse: collapse; margin-bottom: 20px; text-align: left;"" border=""1"">
   <tr style=""background-color: #f3f4f6;"">
     <th style=""padding: 12px; border: 1px solid #e5e7eb;"">Kriter</th>
-    <th style=""padding: 12px; border: 1px solid #e5e7eb;"">[Ürün 1]</th>
-    <th style=""padding: 12px; border: 1px solid #e5e7eb;"">[Ürün 2]</th>
+    <th style=""padding: 12px; border: 1px solid #e5e7eb;"">[Ürün 1 Tam Model Adı]</th>
+    <th style=""padding: 12px; border: 1px solid #e5e7eb;"">[Ürün 2 Tam Model Adı]</th>
   </tr>
   <tr>
     <td style=""padding: 12px; border: 1px solid #e5e7eb;""><b>Fiyat</b></td>
@@ -221,14 +223,14 @@ BU UYARI KUTUSUNU SADECE önerilen ürün fiyatı kullanıcının bütçesini a�
 
 <h3>🛒 Senin İçin Seçtiğim Ürünler</h3>
 <div style=""margin-bottom: 16px;"">
-  <b>1. [Ürün Adı]</b><br>
+  <b>1. [BURAYA ASLA GENEL KATEGORİ YAZMA, GERÇEK MARKA VE MODEL YAZ. Örn: HP Victus 16]</b><br>
   💡 <b>Neden bu?:</b> [Açıklama]<br>
   🗣️ <b>Yorumlar:</b> [Özet]<br>
   <a href=""https://www.akakce.com/arama/?q=urunun+tam+adi"" target=""_blank"" style=""color:#2563eb; font-weight:bold; text-decoration:underline;"">En Ucuz Fiyatlara Bak</a>
 </div>
 
 <div style=""margin-bottom: 16px;"">
-  <b>2. [Ürün Adı]</b><br>
+  <b>2. [BURAYA ASLA GENEL KATEGORİ YAZMA, GERÇEK MARKA VE MODEL YAZ. Örn: Acer Nitro 5]</b><br>
   💡 <b>Neden bu?:</b> [Açıklama]<br>
   🗣️ <b>Yorumlar:</b> [Özet]<br>
   <a href=""https://www.akakce.com/arama/?q=urunun+tam+adi"" target=""_blank"" style=""color:#2563eb; font-weight:bold; text-decoration:underline;"">En Ucuz Fiyatlara Bak</a>
@@ -270,54 +272,73 @@ Kullanıcı iki farklı ürün veya link verip ""Hangisi?"", ""Sence bu mu bu mu
 </div>";
 
                 using var client = new HttpClient();
+                string finalAnswer = null;
+                bool isRequestSuccessful = false;
 
-                // Gemini 2.5 Flash Doğrudan Bağlantı URL'si
-                string url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={_apiKey}";
-
-                var requestBody = new
+                // --- YENİ EKLENEN TRY-CATCH ANAHTAR HAVUZU DÖNGÜSÜ ---
+                foreach (var currentKey in _apiKeys)
                 {
-                    contents = new[]
+                    try
                     {
-        new { parts = new[] { new { text = prompt } } }
-    }
-                };
+                        // gemini-3-flash yerine tam stabil olan gemini-2.5-flash yazıyoruz:
+                        string url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={currentKey}";
+                        
+                        var requestBody = new
+                        {
+                            contents = new[]
+                            {
+                                new { parts = new[] { new { text = prompt } } }
+                            }
+                        };
 
-                string jsonPayload = JsonSerializer.Serialize(requestBody);
-                var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+                        string jsonPayload = JsonSerializer.Serialize(requestBody);
+                        var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
 
-                Debug.WriteLine("--- 4. AŞAMA: Google Sunucularına Bağlanılıyor... ---");
-                var response = await client.PostAsync(url, content);
-                string responseString = await response.Content.ReadAsStringAsync();
+                        Debug.WriteLine($"--- 4. AŞAMA: Google Sunucularına Bağlanılıyor (Key: {currentKey.Substring(0, System.Math.Min(5, currentKey.Length))}...) ---");
+                        var response = await client.PostAsync(url, content);
+                        string responseString = await response.Content.ReadAsStringAsync();
 
-                if (!response.IsSuccessStatusCode)
-                {
-                    Debug.WriteLine("--- API HATASI --- \n" + responseString);
-                    return "Gemini API Hatası: " + response.StatusCode;
+                        if (response.IsSuccessStatusCode)
+                        {
+                            Debug.WriteLine("--- 5. AŞAMA: Gemini cevabı başarıyla üretti! ---");
+
+                            using (JsonDocument doc = JsonDocument.Parse(responseString))
+                            {
+                                var root = doc.RootElement;
+                                finalAnswer = root.GetProperty("candidates")[0]
+                                                         .GetProperty("content")
+                                                         .GetProperty("parts")[0]
+                                                         .GetProperty("text").GetString();
+                            }
+
+                            isRequestSuccessful = true;
+                            break; // Başarılı olunduğu için döngüden çık, sonraki keyleri deneme
+                        }
+
+                        Debug.WriteLine($"⚠️ Anahtar hata döndürdü ({response.StatusCode}). Sonraki yedek anahtara geçiliyor...");
+                    }
+                    catch (System.Exception ex)
+                    {
+                        Debug.WriteLine($"🚨 Anahtar isteği sırasında teknik hata oluşti: {ex.Message}. Sonraki anahtara geçiliyor...");
+                    }
                 }
 
-                Debug.WriteLine("--- 5. AŞAMA: Gemini cevabı başarıyla üretti! ---");
-
-                using (JsonDocument doc = JsonDocument.Parse(responseString))
+                // Eğer havuzdaki hiçbir anahtar çalışmadıysa veya cevap boşsa hata döndür
+                if (!isRequestSuccessful || string.IsNullOrEmpty(finalAnswer))
                 {
-                    var root = doc.RootElement;
-                    string finalAnswer = root.GetProperty("candidates")[0]
-                                             .GetProperty("content")
-                                             .GetProperty("parts")[0]
-                                             .GetProperty("text").GetString();
-
-                    // SİHİRLİ DOKUNUŞ: Cevabı ekrana basmadan önce hafızaya (not defterine) yazıyoruz!
-                    _chatHistory += $"Kullanıcı: {userQuery}\nAura: {finalAnswer}\n---\n";
-
-                    return finalAnswer;
+                    return "<p>Şu anda yoğunluk nedeniyle isteklerinize cevap veremiyorum. Lütfen birkaç dakika sonra tekrar deneyin veya sistem yöneticisiyle iletişime geçin. 🛑</p>";
                 }
+
+                _chatHistory += $"Kullanıcı: {userQuery}\nAura: {finalAnswer}\n---\n";
+                return finalAnswer;
             }
             catch (System.Exception ex)
             {
                 Debug.WriteLine("--- HATA OLUŞTU: " + ex.Message + " ---");
                 return "Ajan bir sorunla karşılaştı: " + ex.Message;
             }
-
         }
+
         public async Task<string> FetchPageContentAsync(string url, string keyword)
         {
             try
@@ -329,24 +350,21 @@ Kullanıcı iki farklı ürün veya link verip ""Hangisi?"", ""Sence bu mu bu mu
 
                 var response = await client.GetStringAsync(url);
 
-                // HTML temizle
                 var text = System.Text.RegularExpressions.Regex.Replace(response, "<[^>]*>", " ");
                 text = System.Text.RegularExpressions.Regex.Replace(text, @"\s+", " ").Trim();
 
-                // Keyword geçen paragrafları bul, sadece onları al
                 var sentences = text.Split(new[] { '.', '!', '?' },
-                                           StringSplitOptions.RemoveEmptyEntries);
+                    StringSplitOptions.RemoveEmptyEntries);
 
                 var relevant = sentences
                     .Where(s => keyword.ToLower().Split(' ')
                                        .Any(w => w.Length > 3 && s.ToLower().Contains(w)))
-                    .Take(10) // En fazla 10 cümle
+                    .Take(10)
                     .ToList();
 
                 if (relevant.Count > 0)
                     return string.Join(". ", relevant);
 
-                // Alakalı cümle bulunamazsa ilk 2000 karakter
                 return text.Length > 1500 ? text.Substring(0, 1500) : text;
             }
             catch

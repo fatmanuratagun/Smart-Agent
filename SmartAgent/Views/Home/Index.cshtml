@@ -388,8 +388,11 @@
 
     <div class="chat-body" id="chat-body">
         <div class="welcome-bubble" id="welcome">
-            <strong>Merhaba! Ben Aura 👋</strong>
-            <p>Bütçeni veya aradığın ürünü bana söyle, sana en sorunsuz modelleri ve en ucuz fiyatları bulayım.</p>
+            <strong>Merhaba! Ben Akıllı Alışveriş Asistanın Aura 🧠✨</strong>
+            <p>Bana bütçeni, aradığın ürünleri veya karşılaştırmak istediğin linkleri söyle; senin için interneti tarayıp en dürüst analizi ve en doğru fiyat linklerini çıkarayım.</p>
+            <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 13px; opacity: 0.8;">
+                ⏱️ <b>Akıllı Hafıza Aktif:</b> Üye olmana gerek yok! Yaptığın tüm keşifler 30 gün boyunca <b>Aura Arşivi</b>'nde saklanır, dilediğin an tek tıkla temizleyebilirsin.
+            </div>
         </div>
     </div>
 
@@ -513,10 +516,13 @@
     function clearChat() {
         const body = document.getElementById('chat-body');
         body.innerHTML = `
-            <div class="welcome-bubble" id="welcome">
-                <strong>Merhaba! Ben Aura 👋</strong>
-                <p>Bütçeni veya aradığın ürünü bana söyle, sana en sorunsuz modelleri ve en ucuz fiyatları bulayım.</p>
-            </div>
+                <div class="welcome-bubble" id="welcome">
+        <strong>Merhaba! Ben Akıllı Alışveriş Asistanın Aura 🧠✨</strong>
+        <p>Bana bütçeni, aradığın ürünleri veya karşılaştırmak istediğin linkleri söyle; senin için interneti tarayıp en dürüst analizi ve en doğru fiyat linklerini çıkarayım.</p>
+        <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 13px; color: var(--muted);">
+            ⏱️ <b>Akıllı Hafıza Aktif:</b> Üye olmana gerek yok! Yaptığın tüm keşifler 30 gün boyunca <b>Aura Arşivi</b>'nde saklanır, dilediğin an tek tıkla temizleyebilirsin.
+        </div>
+    </div>
         `;
     }
 
