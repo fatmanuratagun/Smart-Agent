@@ -33,6 +33,7 @@ namespace SmartAgent.Services
             _serperApiKey = configuration["SerperSettings:ApiKey"];
         }
 
+
         // =========================================
         // 🧠 1. BÜTÇE ALGILAMA (Kullanıcının mesajından bütçeyi bulur)
         // =========================================
@@ -204,6 +205,7 @@ ADIM 1 — YANIT FORMATI SEÇİMİ:
                 -- - DURUM 1: GENEL SORU ---
                 Kullanıcının sorusunda ürün tipi / kullanım amacı net değilse 2 - 3 soru sor, ürün önerme:
 < p > Harika! Sana en uygun seçeneği bulabilmem için birkaç sorum var:</ p >
+- Cinsiyet belirtilmedi (kadın mı, erkek mi, çocuk mu?) — giyim, ayakkabı, çanta için zorunlu sor
 < ul >< li > [Sorular] </ li ></ ul >
 
 ---DURUM 2: SPESİFİK ÜRÜN(Alınır mı?) ---
