@@ -46,6 +46,7 @@ dotnet run
 
 ## 👥 Ekip
 -Fatma Nur ATAGÜN 
+
 -Hayrunnisa KAYA
 
 ## 🏆 BTK Akademi Hackathon 2026
