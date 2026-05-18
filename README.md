@@ -1,6 +1,4 @@
-#🛡️ Aura — Akıllı Alışveriş Danışmanı
-
-> "Akakçe fiyat listeler. Trendyol satar. **Aura seni korur.**"
+🛡️ Aura — Akıllı Alışveriş Danışmanı
 
 Aura, kullanıcıları sahte indirimlerden, bütçe aşımından ve yanlış ürün seçiminden koruyan 
 bir yapay zeka destekli e-ticaret danışmanıdır.
