@@ -6,7 +6,7 @@ bir yapay zeka destekli e-ticaret danışmanıdır.
 ## ✨ Özellikler
 
 - 🧠 **Akıllı Danışman** — Eksik bilgi varsa soru sorar, doğrudan ürün önermez.
-- ⏱️ Akıllı Hafıza (30 Günlük Depolama):** Herhangi bir üyelik gerektirmeden, kullanıcının yaptığı aramalar ve keşifler 30 gün boyunca yerel hafızada (Aura Arşivi) saklanır.
+- **⏱️ Akıllı Hafıza (30 Günlük Depolama):** Herhangi bir üyelik gerektirmeden, kullanıcının yaptığı aramalar ve keşifler 30 gün boyunca yerel hafızada (Aura Arşivi) saklanır.
 - 💰 **Bütçe Kalkanı** — Bütçeni aşan ürünleri filtreler, uyarı verir.
 - 📊 **Kategori Analizi** — Laptop için FPS/ısınma, tencere için yapışmazlık kriterleri.
 - 🗣️ **Yorum Analizi** — Bağımsız forum ve sitelerden gerçek kullanıcı yorumları.
