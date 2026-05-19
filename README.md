@@ -1,7 +1,18 @@
-🛡️ Aura — Akıllı Alışveriş Danışmanı
+# 🛡️ Aura — Yapay Zeka Destekli Akıllı Karar & Alışveriş Danışmanı
 
-Aura, kullanıcıları sahte indirimlerden, bütçe aşımından ve yanlış ürün seçiminden koruyan 
-bir yapay zeka destekli e-ticaret danışmanıdır.
+> 🏆 **Bu proje, BTK Akademi Hackathon 2026 için geliştirilmiştir.**
+> 🌐 **Canlı Demo:** [auraasistan-001-site1.rtempurl.com](http://auraasistan-001-site1.rtempurl.com/)
+
+Aura; geleneksel ve statik e-ticaret filtreleme yöntemlerinin ötesine geçerek, karmaşık veri yığınlarını işleyen ve kullanıcılar için en doğru kararları veren bulut tabanlı bir yapay zeka asistanıdır. Kullanıcıları sahte indirimlerden, bütçe aşımından ve yanlış ürün seçiminden korur.
+
+## ⚡ Aura Nasıl Çalışır? (Temel İşleyiş)
+
+Aura, kullanıcının girdiği bütçe ve kriterlere göre arka planda dinamik bir mühendislik algoritması çalıştırır:
+
+1. **Doğal Dil İşleme & Sorgu Analizi:** Kullanıcıdan gelen istekleri analiz eder; eğer bütçe veya teknik kriterlerde eksik bilgi varsa doğrudan ürün önermek yerine kullanıcıya akıllı sorular sorar.
+2. **Canlı Forum & Yorum Taraması (NLP):** Bağımsız forumları, teknoloji sitelerini ve gerçek kullanıcı şikayetlerini/yorumlarını derinlemesine okuyarak yapay zeka ile analiz eder (Duygu Analizi).
+3. **Anlık Fiyat & Google Entegrasyonu:** En güncel fiyat geçmişini ve arama sonuçlarını gerçek zamanlı olarak senkronize eder.
+4. **Kişiselleştirilmiş Karşılaştırma Tablosu:** Süzülen tüm bu dinamik verileri işleyerek, kullanıcıya ürünlerin artılarını, eksilerini ve jüriye özel yapay zeka tavsiyelerini içeren **Kapsamlı bir Karşılaştırma Tablosu** sunar.
 
 ## ✨ Özellikler
 
@@ -48,7 +59,3 @@ dotnet run
 -Fatma Nur ATAGÜN 
 
 -Hayrunnisa KAYA
-
-## 🏆 BTK Akademi Hackathon 2026
-
-Bu proje BTK Akademi Hackathon 2026 için geliştirilmiştir.
