@@ -2,7 +2,7 @@
 
 > 🏆 **Bu proje, BTK Akademi Hackathon 2026 için geliştirilmiştir.**
 > 🌐 **Canlı Demo:** [auraasistan-001-site1.rtempurl.com](http://auraasistan-001-site1.rtempurl.com/)
-> 🎥 **1 Dakikalık Tanıtım & Demo Videosu:** [YouTube İzleme Linki]((https://youtu.be/lE065Xli3HA))
+> 🎥 **1 Dakikalık Tanıtım & Demo Videosu:** [YouTube İzleme Linki](https://youtu.be/lE065Xli3HA)
 
 
 Aura; geleneksel ve statik e-ticaret filtreleme yöntemlerinin ötesine geçerek, karmaşık veri yığınlarını işleyen ve kullanıcılar için en doğru kararları veren bulut tabanlı bir yapay zeka asistanıdır. Kullanıcıları sahte indirimlerden, bütçe aşımından ve yanlış ürün seçiminden korur.
