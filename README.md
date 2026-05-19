@@ -1,6 +1,7 @@
 # 🛡️ Aura — Yapay Zeka Destekli Akıllı Karar & Alışveriş Danışmanı
 
 > 🏆 **Bu proje, BTK Akademi Hackathon 2026 için geliştirilmiştir.**
+
 > 🌐 **Canlı Demo:** [auraasistan-001-site1.rtempurl.com](http://auraasistan-001-site1.rtempurl.com/)
 
 Aura; geleneksel ve statik e-ticaret filtreleme yöntemlerinin ötesine geçerek, karmaşık veri yığınlarını işleyen ve kullanıcılar için en doğru kararları veren bulut tabanlı bir yapay zeka asistanıdır. Kullanıcıları sahte indirimlerden, bütçe aşımından ve yanlış ürün seçiminden korur.
